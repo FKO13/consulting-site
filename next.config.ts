@@ -5,3 +5,12 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// next.config.js
+module.exports = {
+  output: 'standalone', // Активируем статический экспорт
+  distDir: 'out', // Указываем папку для экспорта
+  images: {
+    unoptimized: true // Для статического экспорта
+  }
+}
