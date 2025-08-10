@@ -14,7 +14,7 @@ export default function ConsultationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     try {
       const response = await fetch('/api/consultation', {
         method: 'POST',
@@ -23,13 +23,17 @@ export default function ConsultationForm() {
         },
         body: JSON.stringify(formData)
       })
-      
+
       if (response.ok) {
         setIsSuccess(true)
         setFormData({ name: '', phone: '', email: '' })
+      } else {
+        console.error('Ошибка отправки формы:', await response.text())
+        alert('❌ Не удалось отправить заявку. Попробуйте ещё раз.')
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Ошибка:', error)
+      alert('⚠ Произошла ошибка при отправке.')
     } finally {
       setIsLoading(false)
     }
@@ -51,7 +55,7 @@ export default function ConsultationForm() {
         placeholder="Ваше имя"
         className="w-full p-4 border rounded-lg"
         value={formData.name}
-        onChange={(e) => setFormData({...formData, name: e.target.value})}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         required
       />
       <input
@@ -59,7 +63,7 @@ export default function ConsultationForm() {
         placeholder="Телефон"
         className="w-full p-4 border rounded-lg"
         value={formData.phone}
-        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         required
       />
       <input
@@ -67,7 +71,7 @@ export default function ConsultationForm() {
         placeholder="Email"
         className="w-full p-4 border rounded-lg"
         value={formData.email}
-        onChange={(e) => setFormData({...formData, email: e.target.value})}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         required
       />
       <button

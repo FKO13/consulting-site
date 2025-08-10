@@ -48,7 +48,7 @@ export default function Hero() {
               whileTap={{ scale: 0.95 }}
               className="border-2 border-white text-white px-8 py-4 rounded-full font-bold"
             >
-              Заказать аудит — 25 000₽
+              Заказать аудит — 40 000₽
             </motion.button>
           </div>
         </motion.div>
@@ -59,4 +59,5 @@ export default function Hero() {
       </div>
     </section>
   )
+  
 }

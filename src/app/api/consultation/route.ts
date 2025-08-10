@@ -1,29 +1,42 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-  const data = await request.json()
-  
-  // Здесь интеграция с CRM (например, AmoCRM)
-  // Пример для AmoCRM:
-  /*
-  const amoResponse = await fetch('https://yourdomain.amocrm.ru/api/v4/leads', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify([{
-      name: `Консультация: ${data.name}`,
-      custom_fields_values: [
-        { field_id: 123456, values: [{ value: data.phone }] },
-        { field_id: 654321, values: [{ value: data.email }] }
-      ]
-    }])
-  })
-  */
+export async function POST(req: Request) {
+  console.log('🔹 API consultation вызван');
 
-  // Временная заглушка (удалите в продакшене)
-  console.log('Lead data:', data)
-  
-  return NextResponse.json({ success: true })
+  try {
+    const body = await req.json();
+    console.log('📦 Получены данные формы:', body);
+
+    const { name, phone, email } = body;
+
+    if (!name || !phone || !email) {
+      console.log('❌ Не все поля заполнены');
+      return NextResponse.json({ ok: false, error: 'Не все поля заполнены' }, { status: 400 });
+    }
+
+    const TELEGRAM_BOT_TOKEN = '8286290657:AAElie3LRBu5biiOGYEdcve3BDi6pj-9_Hk';
+    const TELEGRAM_CHAT_ID = '1190121053';
+
+    try {
+      const text = `📩 Новая заявка с сайта "Больше нуля"\n\nИмя: ${name}\nТелефон: ${phone}\nEmail: ${email}`;
+      console.log('📨 Отправляем в Telegram:', text);
+
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const tgRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text }),
+      });
+
+      const tgData = await tgRes.json();
+      console.log('📬 Ответ Telegram API:', tgData);
+    } catch (tgErr) {
+      console.error('⚠ Ошибка отправки в Telegram', tgErr);
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('💥 API error', err);
+    return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
+  }
 }
