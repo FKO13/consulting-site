@@ -1,3 +1,4 @@
+// src/components/ConsultationFormModal.tsx
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,11 +10,7 @@ interface Props {
 }
 
 export default function ConsultationFormModal({ isOpen, onClose }: Props) {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    message: ''
-  })
+  const [formData, setFormData] = useState({ name: '', phone: '', message: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -53,12 +50,8 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
 
   const normalizePhoneForSend = (formatted: string) => {
     const digits = formatted.replace(/\D/g, '')
-    if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) {
-      return '+7' + digits.slice(1)
-    }
-    if (digits.length === 10) {
-      return '+7' + digits
-    }
+    if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) return '+7' + digits.slice(1)
+    if (digits.length === 10) return '+7' + digits
     return '+' + digits
   }
 
@@ -70,73 +63,37 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
       setError('Имя может содержать только буквы.')
       return
     }
-
-    const digitsLen = formData.phone.replace(/\D/g, '').length
-    if (digitsLen !== 11) {
+    if (formData.phone.replace(/\D/g, '').length !== 11) {
       setError('Введите корректный номер телефона.')
       return
     }
 
     setIsLoading(true)
-
     try {
-      const normalizedPhone = normalizePhoneForSend(formData.phone)
       const payload = {
         name: formData.name.trim(),
-        phone: normalizedPhone,
+        phone: normalizePhoneForSend(formData.phone),
         message: formData.message.trim(),
-        source: 'Модальное окно'
+        source: 'Modal'
       }
 
-      const token = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN
-      const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID
-
-      if (!token || !chatId) {
-        setError('Telegram не настроен. Проверь .env.local')
-        setIsLoading(false)
-        return
-      }
-
-      const text = `📩 Новая заявка с сайта\nИмя: ${payload.name}\nТелефон: ${payload.phone}\nСообщение: ${payload.message || '-'}\nИсточник: ${payload.source}`
-
-      console.log('📤 sending consultation to Telegram (modal):', payload)
-
-      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      const res = await fetch('/api/consultation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text })
+        body: JSON.stringify(payload)
       })
 
-      // безопасно распарсим ответ
-      let data: unknown = null
-      try {
-        data = await res.json()
-      } catch {
-        data = null
-      }
-
+      const data = await res.json().catch(() => null)
       if (!res.ok) {
-        // если объект - попробуем достать description
-        let description: string | undefined
-        if (data && typeof data === 'object' && 'description' in data) {
-          description = (data as { description?: string }).description
-        }
-        console.error('Ошибка Telegram API (modal):', res.status, data)
-        setError(description || 'Ошибка отправки в Telegram')
-        setIsLoading(false)
+        setError((data && data.error) ? data.error : 'Ошибка отправки. Попробуйте позже.')
         return
       }
 
       setIsSuccess(true)
       setFormData({ name: '', phone: '', message: '' })
-
-      setTimeout(() => {
-        setIsSuccess(false)
-        onClose()
-      }, 1500)
+      setTimeout(() => { setIsSuccess(false); onClose() }, 1500)
     } catch (err: unknown) {
-      console.error('Network error при отправке Telegram (modal):', err)
-      setError(err instanceof Error ? err.message : 'Ошибка сети. Попробуйте ещё раз.')
+      setError(err instanceof Error ? err.message : 'Ошибка сети')
     } finally {
       setIsLoading(false)
     }
@@ -154,69 +111,21 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0, scale: 0.86 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.92 }}
-            transition={{ type: 'spring', stiffness: 160, damping: 18 }}
-          >
+          <motion.div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0, scale: 0.86 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.92 }} transition={{ type: 'spring', stiffness: 160, damping: 18 }}>
             <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 relative">
-              <button
-                onClick={onClose}
-                className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
-                aria-label="Закрыть"
-              >
-                ✖
-              </button>
-
+              <button onClick={onClose} className="absolute right-4 top-4 text-gray-500 hover:text-gray-800" aria-label="Закрыть">✖</button>
               <h3 className="text-2xl font-bold mb-3">Получить консультацию</h3>
 
               {isSuccess ? (
-                <div className="text-green-600 font-medium">
-                  ✅ Заявка отправлена!
-                </div>
+                <div className="text-green-600 font-medium">✅ Заявка отправлена!</div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Ваше имя"
-                    className="w-full rounded-lg border px-4 py-2"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                  />
-                  <input
-                    ref={phoneRef}
-                    type="tel"
-                    placeholder="+7 (___) ___-__-__"
-                    className="w-full rounded-lg border px-4 py-2"
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                    onFocus={handlePhoneFocus}
-                    required
-                  />
-                  <textarea
-                    placeholder="Сообщение (опционально)"
-                    rows={3}
-                    className="w-full rounded-lg border px-4 py-2"
-                    value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                  />
+                  <input type="text" placeholder="Ваше имя" className="w-full rounded-lg border px-4 py-2" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} required />
+                  <input ref={phoneRef} type="tel" placeholder="+7 (___) ___-__-__" className="w-full rounded-lg border px-4 py-2" value={formData.phone} onChange={handlePhoneChange} onFocus={handlePhoneFocus} required />
+                  <textarea placeholder="Сообщение (опционально)" rows={3} className="w-full rounded-lg border px-4 py-2" value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} />
                   {error && <div className="text-red-500 text-sm">{error}</div>}
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
-                  >
+                  <button type="submit" disabled={isLoading} className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80 cursor-wait' : ''}`}>
                     {isLoading ? <> <Loader2 className="animate-spin" /> Отправка... </> : 'Отправить заявку'}
                   </button>
                 </form>
