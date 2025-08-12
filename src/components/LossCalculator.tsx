@@ -1,10 +1,14 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import ConsultationFormModal from './ConsultationFormModal'
 
 export default function LossCalculator() {
   const [turnover, setTurnover] = useState(5000000)
   const losses = Math.round(turnover * 0.25)
+
+  // Новое состояние для модалки
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <section id="calculator" className="py-20 bg-gray-50">
@@ -47,12 +51,21 @@ export default function LossCalculator() {
           </div>
 
           <div className="bg-blue-50 p-6 text-center">
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition"
+            >
               Узнать как исправить
             </button>
           </div>
         </motion.div>
       </div>
+
+      {/* Модалка */}
+      <ConsultationFormModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </section>
   )
 }

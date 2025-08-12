@@ -100,8 +100,8 @@ export default function ContactSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
-            <div className="flex items-start"><MapPin className="text-blue-600 mr-4 mt-1" /><div><h3 className="text-xl font-bold mb-2">Адрес</h3><p>г. Москва, ул. Примерная, 123</p></div></div>
-            <div className="flex items-start"><Phone className="text-blue-600 mr-4 mt-1" /><div><h3 className="text-xl font-bold mb-2">Телефон</h3><p>+7 (999) 123-45-67</p></div></div>
+            <div className="flex items-start"><MapPin className="text-blue-600 mr-4 mt-1" /><div><h3 className="text-xl font-bold mb-2">Адрес</h3><p>г. Санкт-Петербург, ул. Миллионная, 6</p></div></div>
+            <div className="flex items-start"><Phone className="text-blue-600 mr-4 mt-1" /><div><h3 className="text-xl font-bold mb-2">Телефон</h3><p>+7 (969) 703-50-00</p></div></div>
             <div className="flex items-start"><Mail className="text-blue-600 mr-4 mt-1" /><div><h3 className="text-xl font-bold mb-2">Email</h3><p>info@bolshe-nulya.ru</p></div></div>
           </motion.div>
 

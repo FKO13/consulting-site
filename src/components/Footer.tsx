@@ -16,7 +16,7 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-4">Контакты</h4>
           <p>info@bolshe-nulya.ru</p>
-          <p>+7 (999) 123-45-67</p>
+          <p>+7 (969) 703-50-00</p>
         </div>
         <div>
           <h4 className="font-bold mb-4">Соцсети</h4>

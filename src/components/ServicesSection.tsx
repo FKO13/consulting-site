@@ -1,10 +1,12 @@
 'use client'
 import { motion } from 'framer-motion'
+import { useState } from 'react'
+import ConsultationFormModal from './ConsultationFormModal'
 
 const services = [
   {
     title: "Платный аудит",
-    price: "25 000₽",
+    price: "40 000₽",
     description: "Полный разбор карточек товаров с гарантией результата",
     features: [
       "Выявление критических ошибок",
@@ -25,6 +27,8 @@ const services = [
 ]
 
 export default function ServicesSection() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
     <section id="services" className="py-20 bg-white">
       <div className="container mx-auto px-6">
@@ -53,12 +57,21 @@ export default function ServicesSection() {
                 ))}
               </ul>
               
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition"
+              >
                 Оставить заявку
               </button>
             </motion.div>
           ))}
         </div>
+
+        {/* Модалка */}
+        <ConsultationFormModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+        />
       </div>
     </section>
   )
