@@ -19,7 +19,6 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
 
-  // Маска телефона (как было)
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '')
     if (digits.length === 0) return ''
@@ -52,7 +51,6 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
     }
   }
 
-  // Нормализация номера для отправки: +7XXXXXXXXXX
   const normalizePhoneForSend = (formatted: string) => {
     const digits = formatted.replace(/\D/g, '')
     if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) {
@@ -68,13 +66,11 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
     e.preventDefault()
     setError(null)
 
-    // Валидация имени (только буквы и пробелы)
     if (!/^[А-Яа-яЁёA-Za-z\s]+$/.test(formData.name.trim())) {
       setError('Имя может содержать только буквы.')
       return
     }
 
-    // Валидация телефона — ожидаем 11 цифр (7xxxxxxxxxx)
     const digitsLen = formData.phone.replace(/\D/g, '').length
     if (digitsLen !== 11) {
       setError('Введите корректный номер телефона.')
@@ -84,7 +80,6 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
     setIsLoading(true)
 
     try {
-      // Нормализуем телефон перед отправкой
       const normalizedPhone = normalizePhoneForSend(formData.phone)
       const payload = {
         name: formData.name.trim(),
@@ -93,18 +88,15 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
         source: 'Модальное окно'
       }
 
-      // Берём те же переменные окружения, что и в ContactSection
       const token = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN
       const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID
 
       if (!token || !chatId) {
-        // Поведение такое же как внизу: показываем понятную ошибку
         setError('Telegram не настроен. Проверь .env.local')
         setIsLoading(false)
         return
       }
 
-      // Текст, как у нижней формы (чтобы в Telegram приходило одинаково)
       const text = `📩 Новая заявка с сайта\nИмя: ${payload.name}\nТелефон: ${payload.phone}\nСообщение: ${payload.message || '-'}\nИсточник: ${payload.source}`
 
       console.log('📤 sending consultation to Telegram (modal):', payload)
@@ -115,17 +107,22 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
         body: JSON.stringify({ chat_id: chatId, text })
       })
 
-      // Попробуем распарсить ответ для подробного сообщения об ошибке
-      let data: any = null
+      // безопасно распарсим ответ
+      let data: unknown = null
       try {
         data = await res.json()
-      } catch (e) {
-        // игнорируем, оставим data = null
+      } catch {
+        data = null
       }
 
       if (!res.ok) {
+        // если объект - попробуем достать description
+        let description: string | undefined
+        if (data && typeof data === 'object' && 'description' in data) {
+          description = (data as { description?: string }).description
+        }
         console.error('Ошибка Telegram API (modal):', res.status, data)
-        setError(data?.description || 'Ошибка отправки в Telegram')
+        setError(description || 'Ошибка отправки в Telegram')
         setIsLoading(false)
         return
       }
@@ -133,20 +130,18 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
       setIsSuccess(true)
       setFormData({ name: '', phone: '', message: '' })
 
-      // Закрыть модалку через 1.5 секунды
       setTimeout(() => {
         setIsSuccess(false)
         onClose()
       }, 1500)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Network error при отправке Telegram (modal):', err)
-      setError('Ошибка сети. Попробуйте ещё раз.')
+      setError(err instanceof Error ? err.message : 'Ошибка сети. Попробуйте ещё раз.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Очистка при закрытии/открытии
   useEffect(() => {
     if (!isOpen) {
       setIsSuccess(false)

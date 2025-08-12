@@ -14,7 +14,6 @@ export default function ContactSection() {
   const [error, setError] = useState<string | null>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
 
-  // Маска телефона
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '')
     if (digits.length === 0) return ''
@@ -47,18 +46,15 @@ export default function ContactSection() {
     }
   }
 
-  // Отправка напрямую в Telegram API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    // Валидация имени (только буквы и пробелы)
     if (!/^[А-Яа-яЁёA-Za-z\s]+$/.test(formData.name.trim())) {
       setError('Имя может содержать только буквы.')
       return
     }
 
-    // Валидация телефона
     if (formData.phone.replace(/\D/g, '').length !== 11) {
       setError('Введите корректный номер телефона.')
       return
@@ -83,14 +79,25 @@ export default function ContactSection() {
       })
 
       if (!res.ok) {
-        throw new Error('Ошибка отправки в Telegram')
+        // попробуем распарсить тело ответа
+        let data: unknown = null
+        try {
+          data = await res.json()
+        } catch {
+          data = null
+        }
+        let desc: string | undefined
+        if (data && typeof data === 'object' && 'description' in data) {
+          desc = (data as { description?: string }).description
+        }
+        throw new Error(desc || 'Ошибка отправки в Telegram')
       }
 
       setIsSuccess(true)
       setFormData({ name: '', phone: '', message: '' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err)
-      setError(err.message || 'Ошибка отправки.')
+      setError(err instanceof Error ? err.message : 'Ошибка отправки.')
     } finally {
       setIsLoading(false)
     }
