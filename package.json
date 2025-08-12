@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.3.0",
+    "@react-three/postprocessing": "^3.0.4",
     "@studio-freight/lenis": "^1.0.42",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
@@ -19,9 +20,11 @@
     "next": "15.4.6",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
+    "postprocessing": "^6.37.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-input-mask": "^2.0.4",
+    "three": "^0.179.1",
     "use-count-up": "^3.0.1"
   },
   "devDependencies": {

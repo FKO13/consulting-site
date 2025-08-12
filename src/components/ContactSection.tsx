@@ -6,21 +6,24 @@ import { MapPin, Mail, Phone, Loader2 } from 'lucide-react'
 export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
-    phone: '+7 ',
+    phone: '',
     message: ''
   })
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
 
+  // Маска телефона
   const formatPhone = (value: string) => {
-    // оставляем только цифры после +7
-    const digits = value.replace(/\D/g, '').slice(1) // убираем 7
+    const digits = value.replace(/\D/g, '')
+    if (digits.length === 0) return ''
+    const rest = digits.startsWith('7') ? digits.slice(1) : digits
     let result = '+7 '
-    if (digits.length > 0) result += '(' + digits.slice(0, 3)
-    if (digits.length >= 3) result += ') ' + digits.slice(3, 6)
-    if (digits.length >= 6) result += '-' + digits.slice(6, 8)
-    if (digits.length >= 8) result += '-' + digits.slice(8, 10)
+    if (rest.length > 0) result += '(' + rest.slice(0, 3)
+    if (rest.length >= 3) result += ') ' + rest.slice(3, 6)
+    if (rest.length >= 6) result += '-' + rest.slice(6, 8)
+    if (rest.length >= 8) result += '-' + rest.slice(8, 10)
     return result
   }
 
@@ -29,40 +32,65 @@ export default function ContactSection() {
     setFormData(prev => ({ ...prev, phone: formatted }))
     requestAnimationFrame(() => {
       if (phoneRef.current) {
-        phoneRef.current.setSelectionRange(formatted.length, formatted.length)
+        const pos = formatted ? formatted.length : 0
+        phoneRef.current.setSelectionRange(pos, pos)
       }
     })
   }
 
   const handlePhoneFocus = () => {
-    if (!formData.phone.startsWith('+7')) {
+    if (!formData.phone) {
       setFormData(prev => ({ ...prev, phone: '+7 ' }))
       requestAnimationFrame(() => {
-        if (phoneRef.current) {
-          phoneRef.current.setSelectionRange(3, 3)
-        }
+        if (phoneRef.current) phoneRef.current.setSelectionRange(3, 3)
       })
     }
   }
 
+  // Отправка напрямую в Telegram API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
+    // Валидация имени (только буквы и пробелы)
+    if (!/^[А-Яа-яЁёA-Za-z\s]+$/.test(formData.name.trim())) {
+      setError('Имя может содержать только буквы.')
+      return
+    }
+
+    // Валидация телефона
+    if (formData.phone.replace(/\D/g, '').length !== 11) {
+      setError('Введите корректный номер телефона.')
+      return
+    }
+
     setIsLoading(true)
+
     try {
-      const res = await fetch('/api/consultation', {
+      const token = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN
+      const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID
+
+      if (!token || !chatId) {
+        throw new Error('Переменные окружения Telegram не найдены')
+      }
+
+      const text = `📩 Новая заявка с сайта\nИмя: ${formData.name}\nТелефон: ${formData.phone}\nСообщение: ${formData.message || '-'}`
+
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ chat_id: chatId, text })
       })
-      if (res.ok) {
-        setIsSuccess(true)
-        setFormData({ name: '', phone: '+7 ', message: '' })
-      } else {
-        alert('Ошибка отправки. Проверьте консоль.')
+
+      if (!res.ok) {
+        throw new Error('Ошибка отправки в Telegram')
       }
-    } catch (err) {
-      console.error('Ошибка отправки формы:', err)
-      alert('Ошибка отправки.')
+
+      setIsSuccess(true)
+      setFormData({ name: '', phone: '', message: '' })
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'Ошибка отправки.')
     } finally {
       setIsLoading(false)
     }
@@ -74,13 +102,7 @@ export default function ContactSection() {
         <h2 className="text-4xl font-bold text-center mb-16">Контакты</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
             <div className="flex items-start">
               <MapPin className="text-blue-600 mr-4 mt-1" />
               <div>
@@ -104,14 +126,7 @@ export default function ContactSection() {
             </div>
           </motion.div>
 
-          <motion.form
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            onSubmit={handleSubmit}
-            className="space-y-4"
-          >
+          <motion.form initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} onSubmit={handleSubmit} className="space-y-4">
             {isSuccess ? (
               <div className="text-center p-8 bg-green-50 rounded-lg">
                 <h3 className="text-2xl font-bold text-green-600 mb-2">Спасибо!</h3>
@@ -144,20 +159,14 @@ export default function ContactSection() {
                   value={formData.message}
                   onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   required
-                ></textarea>
+                />
+                {error && <div className="text-red-500 text-sm">{error}</div>}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 w-full"
+                  className={`bg-blue-600 text-white px-8 py-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 w-full ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      Отправка...
-                    </>
-                  ) : (
-                    'Отправить'
-                  )}
+                  {isLoading ? <> <Loader2 className="animate-spin" /> Отправка... </> : 'Отправить'}
                 </button>
               </>
             )}

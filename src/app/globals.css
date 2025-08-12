@@ -6,9 +6,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
+  /* Переносим переменные из @theme inline сюда */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -28,7 +26,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 3D Text Effects */
+/* === Hero 3D текст === */
 .hero-3d-container {
   perspective: 1000px;
   transform-style: preserve-3d;
@@ -56,7 +54,7 @@ body {
   }
 }
 
-/* Button hover effects */
+/* === Кнопки === */
 .hero-btn-primary {
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -89,10 +87,7 @@ body {
 .btn-glow::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
   transform: translateX(-100%);
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
@@ -102,7 +97,7 @@ body {
   transform: translateX(100%);
 }
 
-/* Эффект наведения на карточки */
+/* Эффект на карточки */
 .card-hover {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -112,7 +107,7 @@ body {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Удалите для мобильных устройств */
+/* === Пользовательский курсор (только если файлы есть) === */
 @media (pointer: fine) {
   body {
     cursor: url('/cursor-default.svg'), auto;
@@ -120,4 +115,255 @@ body {
   a, button {
     cursor: url('/cursor-pointer.svg'), pointer;
   }
+}
+/* Если файлов нет — просто используем стандартные курсоры */
+@supports not (cursor: url('/cursor-default.svg')) {
+  body { cursor: auto; }
+  a, button { cursor: pointer; }
+}
+
+/* === Стили ошибок формы === */
+.error-text {
+  color: #ff4d4f;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+/* === Состояния кнопки отправки === */
+.submit-btn {
+  transition: background-color 0.3s, transform 0.2s;
+}
+.submit-btn.loading {
+  background-color: #999;
+  cursor: wait;
+}
+.submit-btn.success {
+  background-color: #28a745;
+}
+.submit-btn.error {
+  background-color: #dc3545;
+}
+
+/* --- Hero 3D block styles (add to globals.css) --- */
+
+.hero-3d-wrapper {
+  min-height: 72vh;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Canvas should cover background, but keep pointer events off */
+.hero-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Gentle gradient overlay to guarantee readable white text */
+.hero-gradient-overlay {
+  background: radial-gradient(1200px 600px at 10% 20%, rgba(9,30,43,0.52), transparent 18%),
+              radial-gradient(1000px 500px at 85% 80%, rgba(74,25,120,0.34), transparent 22%),
+              linear-gradient(180deg, rgba(6,12,20,0.25), rgba(10,14,20,0.4));
+  mix-blend-mode: normal;
+  z-index: -1;
+}
+
+/* Content box styling */
+.hero-3d-content {
+  z-index: 10;
+  max-width: 980px;
+}
+
+/* Make sure title is readable on top of 3d shape */
+.hero-title {
+  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.06));
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-shadow: 0 6px 20px rgba(3,6,12,0.55);
+}
+
+/* CTA */
+.hero-cta {
+  background: linear-gradient(90deg,#0ea5e9,#4f46e5);
+  color: white;
+  box-shadow: 0 8px 30px rgba(79,70,229,0.18), 0 4px 10px rgba(14,165,233,0.08);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.hero-cta:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 18px 50px rgba(79,70,229,0.22);
+}
+
+.hero-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.hero-3d-canvas {
+  z-index: 0;
+}
+
+.hero-gradient-overlay {
+  pointer-events: none;
+}
+
+.hero-title {
+  text-shadow: 0 6px 20px rgba(0,0,0,0.55);
+}
+
+/* fallback for cursor svgs to avoid 404s */
+@media (pointer: fine) {
+  body { cursor: auto; }
+  a, button { cursor: pointer; }
+}
+
+/* --- Hero 3D: корректные z-index и насыщенный фон --- */
+.hero-3d-wrapper {
+  position: relative;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  /* тёмный градиент чтобы не было белого фона по краям */
+  background: linear-gradient(180deg, #070616 0%, #21093a 60%, #2d0a49 100%);
+}
+
+.hero-3d-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -30; /* canvas — ещё ниже */
+  pointer-events: none;
+}
+.hero-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+/* overlay между canvas и контентом — делает текст читаемым */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -15;
+  background:
+    radial-gradient(800px 500px at 15% 25%, rgba(78, 70, 229, 0.14), transparent 12%),
+    radial-gradient(600px 350px at 85% 70%, rgba(6, 182, 212, 0.10), transparent 12%),
+    linear-gradient(180deg, rgba(3,6,20,0.14), rgba(5,6,18,0.35));
+  mix-blend-mode: overlay;
+}
+
+/* контент поверх сцены */
+.hero-3d-content {
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  padding: 0 18px;
+}
+
+.hero-title {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+}
+
+/* CTA стили — сохранили стиль, но подчёркивают hi-tech */
+.hero-cta {
+  background: linear-gradient(90deg,#06b6d4,#6366f1);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(99,102,241,0.14);
+  transition: transform .15s, box-shadow .15s;
+}
+.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(99,102,241,0.18); }
+
+.hero-cta-outline {
+  border: 2px solid rgba(255,255,255,0.18);
+  color: #fff;
+  background: transparent;
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.hero-cta-outline:hover { background: rgba(255,255,255,0.03); transform: translateY(-3px); }
+
+/* мобильные правки */
+@media (max-width: 768px) {
+  .hero-title { font-size: 1.6rem; }
+  .hero-3d-wrapper { min-height: 56vh; }
+}
+
+/* --- Hero 3D: корректные z-index и насыщенный фон --- */
+.hero-3d-wrapper {
+  position: relative;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  /* тёмный градиент чтобы не было белого фона по краям */
+  background: linear-gradient(180deg, #070616 0%, #21093a 60%, #2d0a49 100%);
+}
+
+.hero-3d-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -30; /* canvas — ещё ниже */
+  pointer-events: none;
+}
+.hero-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+/* overlay между canvas и контентом — делает текст читаемым */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -15;
+  background:
+    radial-gradient(800px 500px at 15% 25%, rgba(78, 70, 229, 0.14), transparent 12%),
+    radial-gradient(600px 350px at 85% 70%, rgba(6, 182, 212, 0.10), transparent 12%),
+    linear-gradient(180deg, rgba(3,6,20,0.14), rgba(5,6,18,0.35));
+  mix-blend-mode: overlay;
+}
+
+/* контент поверх сцены */
+.hero-3d-content {
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  padding: 0 18px;
+}
+
+.hero-title {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
+}
+
+/* CTA стили — сохранили стиль, но подчёркивают hi-tech */
+.hero-cta {
+  background: linear-gradient(90deg,#06b6d4,#6366f1);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(99,102,241,0.14);
+  transition: transform .15s, box-shadow .15s;
+}
+.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(99,102,241,0.18); }
+
+.hero-cta-outline {
+  border: 2px solid rgba(255,255,255,0.18);
+  color: #fff;
+  background: transparent;
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.hero-cta-outline:hover { background: rgba(255,255,255,0.03); transform: translateY(-3px); }
+
+/* мобильные правки */
+@media (max-width: 768px) {
+  .hero-title { font-size: 1.6rem; }
+  .hero-3d-wrapper { min-height: 56vh; }
 }
