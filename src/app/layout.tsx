@@ -1,34 +1,32 @@
+// src/app/layout.tsx
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import Starfield3D from '@/components/Starfield3D'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Больше нуля | Профессиональный аудит Wildberries',
   description: 'Увеличиваем прибыль магазинов на Wildberries на 40-300%',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  icons: { icon: '/favicon.ico' },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        {/* Если были дополнительные метатеги или шрифты — вставляем их сюда */}
-      </head>
-      <body className={`${inter.className} bg-white text-gray-900`}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+    <html lang="ru" suppressHydrationWarning>
+      <body className={`${inter.className} bg-[#05060d] text-gray-100 relative min-h-screen antialiased`}>
+        {/* Звёздный фон — один на всю страницу, под контентом */}
+        <Starfield3D />
+
+        {/* Контент выше звёзд */}
+        <div className="relative z-10">
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   )

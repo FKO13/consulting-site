@@ -1,32 +1,47 @@
+/* === Tailwind (должен быть первым) === */
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
+/* === Базовые переменные проекта (фиксируем тёмную тему) === */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  /* Переносим переменные из @theme inline сюда */
+  /* Фиксированная тёмная тема, не зависит от prefers-color-scheme */
+  --background: #05060d;   /* был var(--background), оставляем, но делаем тёмным */
+  --foreground: #ebeef3;   /* светлый текст для контраста */
+
+  /* Совместимость с уже используемыми переменными */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Шрифты из Next Fonts (как у тебя) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Доп. палитра под hi-tech/люкс (можно использовать в Tailwind через var()) */
+  --color-primary: #00e0ff;
+  --color-secondary: #7b5cff;
+  --color-accent: #00ffcc;
+
+  --lux-primary: #d4af37;
+  --lux-secondary: #c7923e;
+  --lux-accent: #ffdd99;
+
+  /* Свечения (если используешь классы glow из tailwind.config.js) */
+  --shadow-glow-primary: 0 0 15px rgba(0, 224, 255, 0.6);
+  --shadow-glow-secondary: 0 0 15px rgba(123, 92, 255, 0.6);
+  --shadow-glow-accent: 0 0 15px rgba(0, 255, 204, 0.6);
+
+  /* Формы/скроллбары — ведём себя как тёмная тема */
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* === База === */
+html, body { height: 100%; }
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* === Hero 3D текст === */
+/* ===== Hero 3D — текстовый эффект (как у тебя) ===== */
 .hero-3d-container {
   perspective: 1000px;
   transform-style: preserve-3d;
@@ -34,8 +49,8 @@ body {
 
 .hero-3d-text {
   transform: rotateX(20deg);
-  text-shadow: 
-    0 1px 0 #ccc, 
+  text-shadow:
+    0 1px 0 #ccc,
     0 2px 0 #b8b8b8,
     0 3px 0 #a0a0a0,
     0 4px 0 #888,
@@ -46,15 +61,11 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: rotateX(20deg) translateY(0);
-  }
-  50% {
-    transform: rotateX(20deg) translateY(-20px);
-  }
+  0%, 100% { transform: rotateX(20deg) translateY(0); }
+  50% { transform: rotateX(20deg) translateY(-20px); }
 }
 
-/* === Кнопки === */
+/* ===== Кнопки (как в рабочем файле) ===== */
 .hero-btn-primary {
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -92,187 +103,88 @@ body {
   transform: translateX(-100%);
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
-
-.btn-glow:hover::before {
-  transform: translateX(100%);
-}
+.btn-glow:hover::before { transform: translateX(100%); }
 
 /* Эффект на карточки */
-.card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
+.card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .card-hover:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* === Пользовательский курсор (только если файлы есть) === */
+/* ===== Пользовательский курсор с фолбэком ===== */
 @media (pointer: fine) {
-  body {
-    cursor: url('/cursor-default.svg'), auto;
-  }
-  a, button {
-    cursor: url('/cursor-pointer.svg'), pointer;
-  }
+  body { cursor: url('/cursor-default.svg'), auto; }
+  a, button { cursor: url('/cursor-pointer.svg'), pointer; }
 }
-/* Если файлов нет — просто используем стандартные курсоры */
+
 @supports not (cursor: url('/cursor-default.svg')) {
   body { cursor: auto; }
   a, button { cursor: pointer; }
 }
 
-/* === Стили ошибок формы === */
-.error-text {
-  color: #ff4d4f;
-  font-size: 0.85rem;
-  margin-top: 4px;
-}
+/* ===== Стили ошибок формы / состояний отправки ===== */
+.error-text { color: #ff4d4f; font-size: 0.85rem; margin-top: 4px; }
+.submit-btn { transition: background-color 0.3s, transform 0.2s; }
+.submit-btn.loading { background-color: #999; cursor: wait; }
+.submit-btn.success { background-color: #28a745; }
+.submit-btn.error { background-color: #dc3545; }
 
-/* === Состояния кнопки отправки === */
-.submit-btn {
-  transition: background-color 0.3s, transform 0.2s;
-}
-.submit-btn.loading {
-  background-color: #999;
-  cursor: wait;
-}
-.submit-btn.success {
-  background-color: #28a745;
-}
-.submit-btn.error {
-  background-color: #dc3545;
-}
-
-/* --- Hero 3D block styles (add to globals.css) --- */
-
+/* ===== Hero 3D — слой сцены, оверлей и контент ===== */
+/* насыщенный тёмный фон секции, чтобы не было белых «полей» */
 .hero-3d-wrapper {
-  min-height: 72vh;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #070616 0%, #21093a 60%, #2d0a49 100%);
 }
 
-/* Canvas should cover background, but keep pointer events off */
-.hero-3d-canvas canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-/* Gentle gradient overlay to guarantee readable white text */
-.hero-gradient-overlay {
-  background: radial-gradient(1200px 600px at 10% 20%, rgba(9,30,43,0.52), transparent 18%),
-              radial-gradient(1000px 500px at 85% 80%, rgba(74,25,120,0.34), transparent 22%),
-              linear-gradient(180deg, rgba(6,12,20,0.25), rgba(10,14,20,0.4));
-  mix-blend-mode: normal;
-  z-index: -1;
-}
-
-/* Content box styling */
-.hero-3d-content {
-  z-index: 10;
-  max-width: 980px;
-}
-
-/* Make sure title is readable on top of 3d shape */
-.hero-title {
-  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.06));
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 8px;
-  text-shadow: 0 6px 20px rgba(3,6,12,0.55);
-}
-
-/* CTA */
-.hero-cta {
-  background: linear-gradient(90deg,#0ea5e9,#4f46e5);
-  color: white;
-  box-shadow: 0 8px 30px rgba(79,70,229,0.18), 0 4px 10px rgba(14,165,233,0.08);
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.hero-cta:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 18px 50px rgba(79,70,229,0.22);
-}
-
-.hero-3d-canvas canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
+/* canvas ниже всего, вне кликов */
 .hero-3d-canvas {
-  z-index: 0;
-}
-
-.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -30;
   pointer-events: none;
 }
+.hero-3d-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
 
+/* мягкий оверлей между canvas и контентом — делает текст читаемым */
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -15;
+  pointer-events: none;
+  background:
+    radial-gradient(800px 500px at 15% 25%, rgba(78, 70, 229, 0.14), transparent 12%),
+    radial-gradient(600px 350px at 85% 70%, rgba(6, 182, 212, 0.10), transparent 12%),
+    linear-gradient(180deg, rgba(3,6,20,0.14), rgba(5,6,18,0.35));
+  mix-blend-mode: overlay;
+}
+
+/* контент поверх сцены */
+.hero-3d-content {
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  padding: 0 18px;
+}
+
+/* заголовок читаемый на любом фоне */
 .hero-title {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
   text-shadow: 0 6px 20px rgba(0,0,0,0.55);
 }
 
-/* fallback for cursor svgs to avoid 404s */
-@media (pointer: fine) {
-  body { cursor: auto; }
-  a, button { cursor: pointer; }
-}
-
-/* --- Hero 3D: корректные z-index и насыщенный фон --- */
-.hero-3d-wrapper {
-  position: relative;
-  height: 100vh;
-  min-height: 640px;
-  overflow: hidden;
-  /* тёмный градиент чтобы не было белого фона по краям */
-  background: linear-gradient(180deg, #070616 0%, #21093a 60%, #2d0a49 100%);
-}
-
-.hero-3d-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: -30; /* canvas — ещё ниже */
-  pointer-events: none;
-}
-.hero-3d-canvas canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-}
-
-/* overlay между canvas и контентом — делает текст читаемым */
-.hero-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: -15;
-  background:
-    radial-gradient(800px 500px at 15% 25%, rgba(78, 70, 229, 0.14), transparent 12%),
-    radial-gradient(600px 350px at 85% 70%, rgba(6, 182, 212, 0.10), transparent 12%),
-    linear-gradient(180deg, rgba(3,6,20,0.14), rgba(5,6,18,0.35));
-  mix-blend-mode: overlay;
-}
-
-/* контент поверх сцены */
-.hero-3d-content {
-  position: relative;
-  z-index: 10;
-  color: #fff;
-  padding: 0 18px;
-}
-
-.hero-title {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.35);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
-}
-
-/* CTA стили — сохранили стиль, но подчёркивают hi-tech */
+/* CTA-кнопки */
 .hero-cta {
   background: linear-gradient(90deg,#06b6d4,#6366f1);
   color: #fff;
@@ -289,81 +201,85 @@ body {
 }
 .hero-cta-outline:hover { background: rgba(255,255,255,0.03); transform: translateY(-3px); }
 
-/* мобильные правки */
+/* Мобильные правки */
 @media (max-width: 768px) {
   .hero-title { font-size: 1.6rem; }
   .hero-3d-wrapper { min-height: 56vh; }
 }
 
-/* --- Hero 3D: корректные z-index и насыщенный фон --- */
-.hero-3d-wrapper {
-  position: relative;
-  height: 100vh;
-  min-height: 640px;
-  overflow: hidden;
-  /* тёмный градиент чтобы не было белого фона по краям */
-  background: linear-gradient(180deg, #070616 0%, #21093a 60%, #2d0a49 100%);
-}
+/* ===== Технические мелочи ===== */
+canvas { outline: none; }
 
-.hero-3d-canvas {
-  position: absolute;
+/* Глобальный тёмный градиент под всем сайтом (не мешает canvas/3D) */
+body::before {
+  content: "";
+  position: fixed;
   inset: 0;
-  z-index: -30; /* canvas — ещё ниже */
+  z-index: -9999;
   pointer-events: none;
-}
-.hero-3d-canvas canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block !important;
+  background: linear-gradient(180deg, #0a0b10 0%, #10121a 100%);
 }
 
-/* overlay между canvas и контентом — делает текст читаемым */
-.hero-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: -15;
-  background:
-    radial-gradient(800px 500px at 15% 25%, rgba(78, 70, 229, 0.14), transparent 12%),
-    radial-gradient(600px 350px at 85% 70%, rgba(6, 182, 212, 0.10), transparent 12%),
-    linear-gradient(180deg, rgba(3,6,20,0.14), rgba(5,6,18,0.35));
-  mix-blend-mode: overlay;
+/* Акцентные переменные (для новых эффектов) */
+:root {
+  --hi-primary: #00e0ff;
+  --hi-secondary: #7b5cff;
+  --hi-accent: #00ffcc;
+  --hi-muted: #a6adbb;
 }
 
-/* контент поверх сцены */
-.hero-3d-content {
-  position: relative;
-  z-index: 10;
+/* Неоновая типографика */
+.premium-heading {
+  text-shadow: 0 0 8px rgba(0, 224, 255, 0.45);
+}
+.premium-subtitle {
+  color: var(--hi-muted);
+}
+
+/* Ссылки с мягким свечением */
+.premium-link {
+  transition: color .3s ease, text-shadow .3s ease;
+}
+.premium-link:hover {
+  color: var(--hi-accent);
+  text-shadow: 0 0 6px var(--hi-accent);
+}
+
+/* Карточки премиум */
+.premium-card {
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(6px);
+}
+.premium-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25), 0 0 24px rgba(0,224,255,0.18);
+  border-color: rgba(0,224,255,0.25);
+}
+
+/* Кнопки с аккуратным неоновым свечением */
+.btn-neon {
+  background: linear-gradient(90deg, #06b6d4, #6366f1);
   color: #fff;
-  padding: 0 18px;
-}
-
-.hero-title {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.35);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
-}
-
-/* CTA стили — сохранили стиль, но подчёркивают hi-tech */
-.hero-cta {
-  background: linear-gradient(90deg,#06b6d4,#6366f1);
-  color: #fff;
+  border-radius: .75rem;
   box-shadow: 0 10px 30px rgba(99,102,241,0.14);
-  transition: transform .15s, box-shadow .15s;
+  transition: transform .15s, box-shadow .15s, filter .15s;
 }
-.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(99,102,241,0.18); }
+.btn-neon:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.06);
+  box-shadow: 0 20px 50px rgba(99,102,241,0.22), 0 0 30px rgba(0,224,255,0.25);
+}
 
-.hero-cta-outline {
-  border: 2px solid rgba(255,255,255,0.18);
+/* Подсветка выделенного текста */
+::selection {
+  background: rgba(0, 224, 255, .25);
   color: #fff;
-  background: transparent;
-  transition: transform .15s, box-shadow .15s, background .15s;
 }
-.hero-cta-outline:hover { background: rgba(255,255,255,0.03); transform: translateY(-3px); }
 
-/* мобильные правки */
-@media (max-width: 768px) {
-  .hero-title { font-size: 1.6rem; }
-  .hero-3d-wrapper { min-height: 56vh; }
+/* Разделитель «люкс» */
+.divider-lux {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
 }
