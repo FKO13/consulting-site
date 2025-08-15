@@ -2,17 +2,23 @@
 
 import React, { useState, useEffect } from 'react'
 import ConsultationFormModal from "./ConsultationFormModal"
-import { motion } from 'framer-motion'
+import { motion, easeOut } from 'framer-motion' // <-- импорт easeOut
 import Hero3D from './Hero3D'
 
 export default function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [themeColor, setThemeColor] = useState<string>('var(--col-accent)')
 
+  // fadeUp с корректным easing
   const fadeUp = {
     hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.8, ease: easeOut } // <-- используем функцию
+    }
   }
+
   const stagger = {
     visible: { transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
   }
@@ -67,7 +73,7 @@ export default function HeroSection() {
               onClick={() => setIsModalOpen(true)}
               className="cta-button border border-gray-500 bg-transparent text-white hover:filter hover:brightness-105"
             >
-              Заказать аудит — 40 000₽
+              Заказать аудит — от 30 000₽
             </button>
           </motion.div>
         </motion.div>
