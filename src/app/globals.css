@@ -15,124 +15,81 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Доп. палитра под hi-tech/люкс (можно использовать в Tailwind через var()) */
+  /* Акцентная палитра проекта (для эффектов/градиентов) */
   --color-primary: #00e0ff;
   --color-secondary: #7b5cff;
   --color-accent: #00ffcc;
 
-  --lux-primary: #d4af37;
-  --lux-secondary: #c7923e;
-  --lux-accent: #ffdd99;
+  /* Эффекты подсветки/подложек */
+  --glow-cyan: 0 0 60px rgba(68, 230, 255, 0.35);
+  --glow-violet: 0 0 80px rgba(123, 92, 255, 0.28);
+  --ring-soft: 0 0 0 1px rgba(255,255,255,0.06);
 
-  /* Свечения (если используешь классы glow из tailwind.config.js) */
-  --shadow-glow-primary: 0 0 15px rgba(0, 224, 255, 0.6);
-  --shadow-glow-secondary: 0 0 15px rgba(123, 92, 255, 0.6);
-  --shadow-glow-accent: 0 0 15px rgba(0, 255, 204, 0.6);
-
-  /* Формы/скроллбары — ведём себя как тёмная тема */
   color-scheme: dark;
 }
 
-/* === База === */
-html, body { height: 100%; }
-body {
+html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== Hero 3D — текстовый эффект (как у тебя) ===== */
-.hero-3d-container {
-  perspective: 1000px;
-  transform-style: preserve-3d;
+/* Контейнер */
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
-.hero-3d-text {
-  transform: rotateX(20deg);
-  text-shadow:
-    0 1px 0 #ccc,
-    0 2px 0 #b8b8b8,
-    0 3px 0 #a0a0a0,
-    0 4px 0 #888,
-    0 5px 0 #707070,
-    0 6px 5px rgba(0,0,0,0.1),
-    0 0 10px rgba(0,0,0,0.3);
-  animation: float 6s ease-in-out infinite;
+/* Кнопка CTA (общая) */
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #00e0ff, #7b5cff);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: var(--ring-soft), 0 10px 30px rgba(0, 224, 255, 0.22);
+  transition: transform .2s ease, filter .2s ease;
 }
+.cta-button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.cta-button:active { transform: translateY(0); filter: brightness(0.98); }
 
-@keyframes float {
-  0%, 100% { transform: rotateX(20deg) translateY(0); }
-  50% { transform: rotateX(20deg) translateY(-20px); }
+/* Формы (общие стили для модалки) */
+.input, .textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--foreground);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
 }
-
-/* ===== Кнопки (как в рабочем файле) ===== */
-.hero-btn-primary {
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.input:focus, .textarea:focus {
+  border-color: rgba(0, 224, 255, 0.45);
+  background: rgba(0, 224, 255, 0.055);
+  box-shadow: 0 0 0 3px rgba(0, 224, 255, 0.15);
 }
-
-.hero-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.hero-btn-outline {
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
-}
-
-.hero-btn-outline:hover {
-  background: white !important;
-  color: #4f46e5 !important;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.2);
-}
-
-/* Кнопки с градиентным свечением */
-.btn-glow {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.btn-glow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-  transform: translateX(-100%);
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-.btn-glow:hover::before { transform: translateX(100%); }
-
-/* Эффект на карточки */
-.card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* ===== Пользовательский курсор с фолбэком ===== */
-@media (pointer: fine) {
-  body { cursor: url('/cursor-default.svg'), auto; }
-  a, button { cursor: url('/cursor-pointer.svg'), pointer; }
-}
-
-@supports not (cursor: url('/cursor-default.svg')) {
-  body { cursor: auto; }
-  a, button { cursor: pointer; }
-}
-
-/* ===== Стили ошибок формы / состояний отправки ===== */
+.label { color: rgba(255,255,255,0.75); font-size: .9rem; }
+.help-text { color: rgba(255,255,255,0.6); font-size: .85rem; }
 .error-text { color: #ff4d4f; font-size: 0.85rem; margin-top: 4px; }
 .submit-btn { transition: background-color 0.3s, transform 0.2s; }
 .submit-btn.loading { background-color: #999; cursor: wait; }
 .submit-btn.success { background-color: #28a745; }
 .submit-btn.error { background-color: #dc3545; }
 
-/* ===== Hero 3D — слой сцены, оверлей и контент ===== */
-/* насыщенный тёмный фон секции, чтобы не было белых «полей» */
-.hero-3d-wrapper {
+/* === HERO (3D сцена) === */
+.hero-scene {
   position: relative;
   height: 100vh;
   min-height: 640px;
@@ -166,108 +123,32 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* контент поверх сцены */
-.hero-3d-content {
+/* Слой с контентом */
+.hero-content {
   position: relative;
   z-index: 10;
+}
+
+/* Декоративные рамки/карточки (глобальные) */
+.card-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.03)
+  );
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.25), var(--ring-soft);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(90deg, #00e0ff, #7b5cff);
   color: #fff;
-  padding: 0 18px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 224, 255, 0.18);
 }
-
-/* заголовок читаемый на любом фоне */
-.hero-title {
-  display: inline-block;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.35);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.45);
-  text-shadow: 0 6px 20px rgba(0,0,0,0.55);
-}
-
-/* CTA-кнопки */
-.hero-cta {
-  background: linear-gradient(90deg,#06b6d4,#6366f1);
-  color: #fff;
-  box-shadow: 0 10px 30px rgba(99,102,241,0.14);
-  transition: transform .15s, box-shadow .15s;
-}
-.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(99,102,241,0.18); }
-
-.hero-cta-outline {
-  border: 2px solid rgba(255,255,255,0.18);
-  color: #fff;
-  background: transparent;
-  transition: transform .15s, box-shadow .15s, background .15s;
-}
-.hero-cta-outline:hover { background: rgba(255,255,255,0.03); transform: translateY(-3px); }
-
-/* Мобильные правки */
-@media (max-width: 768px) {
-  .hero-title { font-size: 1.6rem; }
-  .hero-3d-wrapper { min-height: 56vh; }
-}
-
-/* ===== Технические мелочи ===== */
-canvas { outline: none; }
-
-/* Глобальный тёмный градиент под всем сайтом (не мешает canvas/3D) */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -9999;
-  pointer-events: none;
-  background: linear-gradient(180deg, #0a0b10 0%, #10121a 100%);
-}
-
-/* Акцентные переменные (для новых эффектов) */
-:root {
-  --hi-primary: #00e0ff;
-  --hi-secondary: #7b5cff;
-  --hi-accent: #00ffcc;
-  --hi-muted: #a6adbb;
-}
-
-/* Неоновая типографика */
-.premium-heading {
-  text-shadow: 0 0 8px rgba(0, 224, 255, 0.45);
-}
-.premium-subtitle {
-  color: var(--hi-muted);
-}
-
-/* Ссылки с мягким свечением */
-.premium-link {
-  transition: color .3s ease, text-shadow .3s ease;
-}
-.premium-link:hover {
-  color: var(--hi-accent);
-  text-shadow: 0 0 6px var(--hi-accent);
-}
-
-/* Карточки премиум */
-.premium-card {
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.02);
-  backdrop-filter: blur(6px);
-}
-.premium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.25), 0 0 24px rgba(0,224,255,0.18);
-  border-color: rgba(0,224,255,0.25);
-}
-
-/* Кнопки с аккуратным неоновым свечением */
-.btn-neon {
-  background: linear-gradient(90deg, #06b6d4, #6366f1);
-  color: #fff;
-  border-radius: .75rem;
-  box-shadow: 0 10px 30px rgba(99,102,241,0.14);
-  transition: transform .15s, box-shadow .15s, filter .15s;
-}
-.btn-neon:hover {
-  transform: translateY(-3px);
+.btn-primary-gradient:hover {
   filter: brightness(1.06);
   box-shadow: 0 20px 50px rgba(99,102,241,0.22), 0 0 30px rgba(0,224,255,0.25);
 }
@@ -282,4 +163,224 @@ body::before {
 .divider-lux {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+}
+
+/* === Section theming (scoped colors per block) ===
+   Цель: задать управляемые цвета для каждого крупного блока (Hero, About, Services, Cases, Process, Blog, Contacts, Calculator)
+   Без правок в разметке: опираемся на уже существующие <section> (1-я = Hero, 2-я = About) и id у остальных.
+   Как пользоваться:
+   - Меняйте значения переменных ниже для каждого блока: --*-text, --*-heading, --*-muted, --*-accent, --*-ok.
+   - Если хотите тонкую настройку — меняйте только переменные, селекторы ниже трогать не нужно.
+*/
+:root {
+  /* Hero (тёмный фон) */
+  --hero-text:    #e8edf5;
+  --hero-heading: #ffffff;
+  --hero-muted:   rgba(232, 237, 245, .72);
+  --hero-accent:  #44e6ff;
+  --hero-ok:      #22c55e;
+
+  /* About (тёмный фон) */
+  --about-text:    #e8edf5;
+  --about-heading: #ffffff;
+  --about-muted:   #acb6c6;
+  --about-accent:  #00ffcc;
+  --about-ok:      #22c55e;
+
+  /* Services (светлый фон) */
+  --services-text:    #0f172a;  /* slate-900 */
+  --services-heading: #0b132b;
+  --services-muted:   #475569;  /* slate-600 */
+  --services-accent:  #2563eb;  /* blue-600 */
+  --services-ok:      #16a34a;  /* green-600 */
+
+  /* Cases (светлый фон) */
+  --cases-text:    #0f172a;
+  --cases-heading: #0b132b;
+  --cases-muted:   #475569;
+  --cases-accent:  #2563eb;
+  --cases-ok:      #16a34a;
+
+  /* Process (серый светлый фон) */
+  --process-text:    #0b132b;
+  --process-heading: #0b132b;
+  --process-muted:   #475569;
+  --process-accent:  #2563eb;
+  --process-ok:      #16a34a;
+
+  /* Blog (серый светлый фон) */
+  --blog-text:    #0b132b;
+  --blog-heading: #0b132b;
+  --blog-muted:   #475569;
+  --blog-accent:  #2563eb;
+  --blog-ok:      #16a34a;
+
+  /* Contacts (светлый фон) */
+  --contacts-text:    #0b132b;
+  --contacts-heading: #0b132b;
+  --contacts-muted:   #475569;
+  --contacts-accent:  #2563eb;
+  --contacts-ok:      #16a34a;
+
+  /* Calculator (серый светлый фон) */
+  --calculator-text:    #0b132b;
+  --calculator-heading: #0b132b;
+  --calculator-muted:   #475569;
+  --calculator-accent:  #2563eb;
+  --calculator-ok:      #16a34a;
+}
+
+/* === Присваиваем токены конкретным секциям === */
+/* 1-я секция главной — обёртка Hero (и внутренний <section> самого Hero) */
+main > section:nth-of-type(1),
+main > section:nth-of-type(1) section {
+  --col-text:    var(--hero-text);
+  --col-heading: var(--hero-heading);
+  --col-muted:   var(--hero-muted);
+  --col-accent:  var(--hero-accent);
+  --col-ok:      var(--hero-ok);
+}
+
+/* 2-я секция главной — About */
+main > section:nth-of-type(2) {
+  --col-text:    var(--about-text);
+  --col-heading: var(--about-heading);
+  --col-muted:   var(--about-muted);
+  --col-accent:  var(--about-accent);
+  --col-ok:      var(--about-ok);
+}
+
+/* Секции с id */
+#services {
+  --col-text:    var(--services-text);
+  --col-heading: var(--services-heading);
+  --col-muted:   var(--services-muted);
+  --col-accent:  var(--services-accent);
+  --col-ok:      var(--services-ok);
+}
+#cases {
+  --col-text:    var(--cases-text);
+  --col-heading: var(--cases-heading);
+  --col-muted:   var(--cases-muted);
+  --col-accent:  var(--cases-accent);
+  --col-ok:      var(--cases-ok);
+}
+#process {
+  --col-text:    var(--process-text);
+  --col-heading: var(--process-heading);
+  --col-muted:   var(--process-muted);
+  --col-accent:  var(--process-accent);
+  --col-ok:      var(--process-ok);
+}
+#blog {
+  --col-text:    var(--blog-text);
+  --col-heading: var(--blog-heading);
+  --col-muted:   var(--blog-muted);
+  --col-accent:  var(--blog-accent);
+  --col-ok:      var(--blog-ok);
+}
+#contacts {
+  --col-text:    var(--contacts-text);
+  --col-heading: var(--contacts-heading);
+  --col-muted:   var(--contacts-muted);
+  --col-accent:  var(--contacts-accent);
+  --col-ok:      var(--contacts-ok);
+}
+#calculator {
+  --col-text:    var(--calculator-text);
+  --col-heading: var(--calculator-heading);
+  --col-muted:   var(--calculator-muted);
+  --col-accent:  var(--calculator-accent);
+  --col-ok:      var(--calculator-ok);
+}
+
+/* === Применение токенов внутри секций === */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) {
+  /* Базовый цвет текста для всего блока */
+  color: var(--col-text);
+}
+
+/* Заголовки внутри блока */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) :is(h1,h2,h3,h4,h5,h6) {
+  color: var(--col-heading);
+}
+
+/* Мягкий текст/подписи/описания */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) :is(.text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, small, .muted, .subtitle, .description) {
+  color: var(--col-muted) !important;
+}
+
+/* Акцентные цвета — ссылки, яркие метки, подчёркнутые фразы */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) :is(a:not([class*="bg-"]):not(.btn):not(.button), .accent, .text-blue-600, .text-indigo-500, .text-cyan-400, .text-teal-400) {
+  color: var(--col-accent) !important;
+}
+
+/* Позитивные маркеры (галочки и т.п.) */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) :is(.text-green-500, .text-green-600, .ok, .success) {
+  color: var(--col-ok) !important;
+}
+
+/* Нейтрализуем "жёсткие" tailwind-цвета, чтобы блок наследовал свой col-text */
+:where(
+  main > section:nth-of-type(1),
+  main > section:nth-of-type(1) section,
+  main > section:nth-of-type(2),
+  #services,
+  #cases,
+  #process,
+  #blog,
+  #contacts,
+  #calculator
+) :is(.text-white, .text-gray-100, .text-gray-200, .text-black, .text-slate-900) {
+  color: inherit !important;
 }
