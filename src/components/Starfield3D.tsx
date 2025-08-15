@@ -6,7 +6,15 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 
-function StarLayer({ count = 1100, depth = 140, speed = 7, size = 90, seed = 0 }) {
+interface StarLayerProps {
+  count?: number
+  depth?: number
+  speed?: number
+  size?: number
+  seed?: number
+}
+
+function StarLayer({ count = 1100, depth = 140, speed = 7, size = 90, seed = 0 }: StarLayerProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null)
   const geom = useMemo(() => new THREE.BufferGeometry(), [])
 
@@ -81,12 +89,15 @@ function StarLayer({ count = 1100, depth = 140, speed = 7, size = 90, seed = 0 }
   )
 
   const { viewport, mouse } = useThree()
-  useFrame((_, delta) => {
+
+  useFrame((state, delta) => {
     if (!matRef.current) return
     matRef.current.uniforms.uTime.value += delta
+
+    const scrollOffset = window.scrollY * 0.002
     matRef.current.uniforms.uParallax.value.set(
       mouse.x * 0.14 * viewport.width,
-      mouse.y * 0.14 * viewport.height
+      mouse.y * 0.14 * viewport.height + scrollOffset
     )
   })
 
@@ -102,6 +113,7 @@ function Starfield() {
     <group>
       <StarLayer count={900} depth={140} speed={6} size={90} seed={1} />
       <StarLayer count={700} depth={180} speed={10} size={130} seed={2} />
+      <StarLayer count={500} depth={220} speed={4} size={150} seed={3} />
     </group>
   )
 }
@@ -121,6 +133,7 @@ export default function Starfield3D() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
       <Canvas
+        style={{ position: 'fixed', top: 0, left: 0 }}
         camera={{ position: [0, 0, 8], fov: 50 }}
         gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
         shadows={false}

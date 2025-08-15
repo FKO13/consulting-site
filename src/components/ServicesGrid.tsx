@@ -4,34 +4,16 @@ import { useState } from 'react'
 import ConsultationFormModal from './ConsultationFormModal'
 
 const services = [
-  {
-    title: "Платный аудит",
-    price: "40 000₽",
-    desc: "Полный разбор карточек товаров, ценовой политики и логистики с гарантией результата",
-    features: [
-      "Выявление критических ошибок",
-      "Анализ 10+ ключевых параметров",
-      "Рекомендации по оптимизации"
-    ]
-  },
-  {
-    title: "Консалтинг PRO",
-    price: "15% от прибыли",
-    desc: "Полное сопровождение для магазинов от 10 млн/мес",
-    features: [
-      "Персональный менеджер 24/7",
-      "Еженедельные отчеты",
-      "Оптимизация рекламных кампаний"
-    ]
-  }
+  { title: "Платный аудит", price: "40 000₽", desc: "Полный разбор карточек товаров, ценовой политики и логистики с гарантией результата", features: ["Выявление критических ошибок", "Анализ 10+ ключевых параметров", "Рекомендации по оптимизации"] },
+  { title: "Консалтинг PRO", price: "15% от прибыли", desc: "Полное сопровождение для магазинов от 10 млн/мес", features: ["Персональный менеджер 24/7", "Еженедельные отчеты", "Оптимизация рекламных кампаний"] }
 ]
 
 export default function ServicesGrid() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section className="py-20 bg-transparent relative z-10">
+      <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service, i) => (
           <motion.div
             key={i}
@@ -40,11 +22,11 @@ export default function ServicesGrid() {
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
             whileHover={{ y: -10 }}
-            className="bg-white p-8 rounded-xl shadow-lg border border-gray-100"
+            className="bg-gray-900/20 p-8 rounded-xl shadow-lg border border-gray-700 text-white"
           >
             <h3 className="text-3xl font-bold mb-2">{service.title}</h3>
-            <div className="text-2xl font-bold text-blue-600 mb-4">{service.price}</div>
-            <p className="text-gray-600 mb-6">{service.desc}</p>
+            <div className="text-2xl font-bold text-blue-400 mb-4">{service.price}</div>
+            <p className="text-gray-300 mb-6">{service.desc}</p>
             <ul className="space-y-2 mb-6">
               {service.features.map((feature, j) => (
                 <li key={j} className="flex items-center">
@@ -63,11 +45,10 @@ export default function ServicesGrid() {
         ))}
       </div>
 
-      {/* Модалка */}
       <ConsultationFormModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
       />
-    </>
+    </section>
   )
 }

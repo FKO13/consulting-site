@@ -18,7 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" suppressHydrationWarning>
       <body className={`${inter.className} bg-[#05060d] text-gray-100 relative min-h-screen antialiased`}>
-        {/* Звёздный фон — один на всю страницу, под контентом */}
+
+        {/* ⭐ Звёздный фон — под всеми секциями, фиксированный */}
         <Starfield3D />
 
         {/* Контент выше звёзд */}
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
         </div>
+
       </body>
     </html>
   )

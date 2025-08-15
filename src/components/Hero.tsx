@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ConsultationFormModal from "./ConsultationFormModal"
 import { motion } from 'framer-motion'
 import Hero3D from './Hero3D'
 
 export default function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [themeColor, setThemeColor] = useState<string>('var(--col-accent)')
 
   const fadeUp = {
     hidden: { opacity: 0, y: 24 },
@@ -16,9 +17,18 @@ export default function HeroSection() {
     visible: { transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
   }
 
+  // Берём цвет из текущей секции через CSS-переменную (только на клиенте)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const section = document.querySelector<HTMLElement>('main > section:nth-of-type(1)')
+    if (!section) return
+    const accent = getComputedStyle(section).getPropertyValue('--col-accent')?.trim()
+    if (accent) setThemeColor(accent)
+  }, [])
+
   return (
     <>
-      <section className="relative h-screen overflow-hidden"> {/* убрали bg-black */}
+      <section className="relative h-screen overflow-hidden">
         <Hero3D />
 
         <motion.div
@@ -44,17 +54,18 @@ export default function HeroSection() {
 
           <motion.div
             variants={fadeUp}
-            className="mt-6 flex gap-4"
+            className="mt-6 flex gap-4 flex-wrap justify-center"
           >
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-lg hover:scale-105 transition"
+              className="cta-button"
             >
               Получить консультацию
             </button>
+
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 rounded-full border border-gray-500 text-white font-semibold hover:bg-white/10 transition"
+              className="cta-button border border-gray-500 bg-transparent text-white hover:filter hover:brightness-105"
             >
               Заказать аудит — 40 000₽
             </button>
@@ -65,6 +76,7 @@ export default function HeroSection() {
       <ConsultationFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        themeColor={themeColor}
       />
     </>
   )

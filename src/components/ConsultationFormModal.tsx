@@ -7,9 +7,10 @@ import { Loader2 } from 'lucide-react'
 interface Props {
   isOpen: boolean
   onClose: () => void
+  themeColor?: string
 }
 
-export default function ConsultationFormModal({ isOpen, onClose }: Props) {
+export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'var(--col-accent)' }: Props) {
   const [formData, setFormData] = useState({ name: '', phone: '', message: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -111,21 +112,83 @@ export default function ConsultationFormModal({ isOpen, onClose }: Props) {
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0, scale: 0.86 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.92 }} transition={{ type: 'spring', stiffness: 160, damping: 18 }}>
-            <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 relative">
-              <button onClick={onClose} className="absolute right-4 top-4 text-gray-500 hover:text-gray-800" aria-label="Закрыть">✖</button>
-              <h3 className="text-2xl font-bold mb-3">Получить консультацию</h3>
+          {/* Фон */}
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
+          {/* Модалка */}
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0, scale: 0.8, rotateX: -10 }}
+            animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+            exit={{ opacity: 0, scale: 0.9, rotateX: -10 }}
+            transition={{ type: 'spring', stiffness: 160, damping: 18 }}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl shadow-2xl p-6 relative border-2"
+              style={{
+                borderColor: themeColor,
+                backgroundColor: 'var(--background)',
+                color: 'var(--foreground)',
+                boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 40px ${themeColor}33`
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Закрыть */}
+              <button
+                onClick={onClose}
+                className="absolute right-4 top-4 text-gray-400 hover:text-gray-200 cursor-pointer text-lg"
+                aria-label="Закрыть"
+              >
+                ✖
+              </button>
+
+              <h3 className="text-2xl font-bold mb-3" style={{ color: themeColor }}>Получить консультацию</h3>
 
               {isSuccess ? (
-                <div className="text-green-600 font-medium">✅ Заявка отправлена!</div>
+                <div className="font-medium text-center" style={{ color: themeColor }}>✅ Заявка отправлена!</div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
-                  <input type="text" placeholder="Ваше имя" className="w-full rounded-lg border px-4 py-2" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} required />
-                  <input ref={phoneRef} type="tel" placeholder="+7 (___) ___-__-__" className="w-full rounded-lg border px-4 py-2" value={formData.phone} onChange={handlePhoneChange} onFocus={handlePhoneFocus} required />
-                  <textarea placeholder="Сообщение (опционально)" rows={3} className="w-full rounded-lg border px-4 py-2" value={formData.message} onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))} />
+                  <input
+                    type="text"
+                    placeholder="Ваше имя"
+                    className="w-full rounded-lg border px-4 py-2 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 transition cursor-text"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    required
+                  />
+                  <input
+                    ref={phoneRef}
+                    type="tel"
+                    placeholder="+7 (___) ___-__-__"
+                    className="w-full rounded-lg border px-4 py-2 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 transition cursor-text"
+                    value={formData.phone}
+                    onChange={handlePhoneChange}
+                    onFocus={handlePhoneFocus}
+                    required
+                  />
+                  <textarea
+                    placeholder="Сообщение (опционально)"
+                    rows={3}
+                    className="w-full rounded-lg border px-4 py-2 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 transition cursor-text"
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                  />
                   {error && <div className="text-red-500 text-sm">{error}</div>}
-                  <button type="submit" disabled={isLoading} className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80 cursor-wait' : ''}`}>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-semibold uppercase shadow-lg transform transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl ${isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'}`}
+                    style={{
+                      background: `linear-gradient(90deg, ${themeColor}, #7b5cff)`,
+                      color: '#fff'
+                    }}
+                  >
                     {isLoading ? <> <Loader2 className="animate-spin" /> Отправка... </> : 'Отправить заявку'}
                   </button>
                 </form>
