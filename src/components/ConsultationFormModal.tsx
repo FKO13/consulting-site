@@ -10,6 +10,10 @@ interface Props {
   themeColor?: string
 }
 
+type ApiSuccess = { success: true }
+type ApiError = { error: string; code?: 'TELEGRAM_NOT_CONFIGURED' | string }
+type ApiResponse = ApiSuccess | ApiError | null
+
 export default function ConsultationFormModal({
   isOpen,
   onClose,
@@ -88,14 +92,21 @@ export default function ConsultationFormModal({
         body: JSON.stringify(payload)
       })
 
-      const data: any = await res.json().catch(() => null)
+      // Безопасный парсинг и без any
+      let data: ApiResponse = null
+      try {
+        data = (await res.json()) as unknown as ApiResponse
+      } catch {
+        data = null
+      }
 
       if (!res.ok) {
-        // Точное сообщение, если Телеграм не сконфигурен
-        if (data?.code === 'TELEGRAM_NOT_CONFIGURED') {
+        if (data && 'code' in data && data.code === 'TELEGRAM_NOT_CONFIGURED') {
           setError('Интеграция с Telegram не настроена. Свяжитесь с администратором.')
+        } else if (data && 'error' in data) {
+          setError(data.error)
         } else {
-          setError(data?.error || 'Ошибка отправки. Попробуйте позже.')
+          setError('Ошибка отправки. Попробуйте позже.')
         }
         return
       }
@@ -201,6 +212,7 @@ export default function ConsultationFormModal({
                   <button
                     type="submit"
                     disabled={isLoading}
+                    aria-disabled={isLoading}
                     className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-semibold uppercase shadow-lg transform transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl ${
                       isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'
                     }`}
