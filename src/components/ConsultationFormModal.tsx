@@ -10,7 +10,11 @@ interface Props {
   themeColor?: string
 }
 
-export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'var(--col-accent)' }: Props) {
+export default function ConsultationFormModal({
+  isOpen,
+  onClose,
+  themeColor = 'var(--col-accent)'
+}: Props) {
   const [formData, setFormData] = useState({ name: '', phone: '', message: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -84,15 +88,24 @@ export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'v
         body: JSON.stringify(payload)
       })
 
-      const data = await res.json().catch(() => null)
+      const data: any = await res.json().catch(() => null)
+
       if (!res.ok) {
-        setError((data && data.error) ? data.error : 'Ошибка отправки. Попробуйте позже.')
+        // Точное сообщение, если Телеграм не сконфигурен
+        if (data?.code === 'TELEGRAM_NOT_CONFIGURED') {
+          setError('Интеграция с Telegram не настроена. Свяжитесь с администратором.')
+        } else {
+          setError(data?.error || 'Ошибка отправки. Попробуйте позже.')
+        }
         return
       }
 
       setIsSuccess(true)
       setFormData({ name: '', phone: '', message: '' })
-      setTimeout(() => { setIsSuccess(false); onClose() }, 1500)
+      setTimeout(() => {
+        setIsSuccess(false)
+        onClose()
+      }, 1500)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Ошибка сети')
     } finally {
@@ -120,6 +133,7 @@ export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'v
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
+
           {/* Модалка */}
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -147,10 +161,14 @@ export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'v
                 ✖
               </button>
 
-              <h3 className="text-2xl font-bold mb-3" style={{ color: themeColor }}>Получить консультацию</h3>
+              <h3 className="text-2xl font-bold mb-3" style={{ color: themeColor }}>
+                Получить консультацию
+              </h3>
 
               {isSuccess ? (
-                <div className="font-medium text-center" style={{ color: themeColor }}>✅ Заявка отправлена!</div>
+                <div className="font-medium text-center" style={{ color: themeColor }}>
+                  ✅ Заявка отправлена!
+                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <input
@@ -158,7 +176,7 @@ export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'v
                     placeholder="Ваше имя"
                     className="w-full rounded-lg border px-4 py-2 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 transition cursor-text"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     required
                   />
                   <input
@@ -176,20 +194,28 @@ export default function ConsultationFormModal({ isOpen, onClose, themeColor = 'v
                     rows={3}
                     className="w-full rounded-lg border px-4 py-2 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-cyan-400 transition cursor-text"
                     value={formData.message}
-                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    onChange={e => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   />
                   {error && <div className="text-red-500 text-sm">{error}</div>}
 
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-semibold uppercase shadow-lg transform transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl ${isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'}`}
+                    className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-semibold uppercase shadow-lg transform transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl ${
+                      isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'
+                    }`}
                     style={{
                       background: `linear-gradient(90deg, ${themeColor}, #7b5cff)`,
                       color: '#fff'
                     }}
                   >
-                    {isLoading ? <> <Loader2 className="animate-spin" /> Отправка... </> : 'Отправить заявку'}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="animate-spin" /> Отправка...
+                      </>
+                    ) : (
+                      'Отправить заявку'
+                    )}
                   </button>
                 </form>
               )}
