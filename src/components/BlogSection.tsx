@@ -29,26 +29,38 @@ export default function BlogSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-transparent rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition cursor-pointer group border border-gray-700 p-4"
+              className="group bg-gray-900/20 backdrop-blur-sm rounded-2xl 
+                         border border-transparent hover:border-blue-500/60
+                         hover:shadow-[0_0_25px_rgba(59,130,246,0.4)]
+                         transition duration-300 ease-in-out cursor-pointer flex flex-col overflow-hidden"
             >
               <div className="relative">
-                <div className="aspect-video bg-gray-800 flex items-center justify-center rounded-lg">
-                  <PlayCircle className="w-16 h-16 text-blue-500 opacity-80 group-hover:opacity-100 transition" />
+                {/* Заглушка под превью */}
+                <div className="aspect-video bg-gradient-to-br from-blue-900/40 to-indigo-900/40 flex items-center justify-center">
+                  <PlayCircle className="w-20 h-20 text-blue-400 opacity-80 group-hover:opacity-100 transition animate-pulse" />
                 </div>
-                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2 py-1 rounded text-sm">
                   {video.duration}
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition text-white">{video.title}</h3>
-                <p className="text-gray-300">{video.desc}</p>
+
+              <div className="p-6 flex flex-col flex-1">
+                <h3 className="text-lg md:text-xl font-semibold mb-2 text-white group-hover:text-blue-400 transition">
+                  {video.title}
+                </h3>
+                <p className="text-gray-300 flex-1">{video.desc}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <button className="border-2 border-blue-500 text-blue-500 px-8 py-3 rounded-full font-bold hover:bg-blue-500 hover:text-white transition">
+          <button 
+            className="inline-block px-8 py-4 font-semibold text-white rounded-full
+                       bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md
+                       hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]
+                       transition-all duration-300"
+          >
             Все видео (27+)
           </button>
         </div>

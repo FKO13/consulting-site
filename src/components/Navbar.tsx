@@ -24,64 +24,68 @@ export default function Navbar() {
     { name: 'Контакты', href: '#contacts' }
   ]
 
-  // Безопасно берём accent цвет секции
-  const getSectionAccentColor = (selector: string = 'main > section:nth-of-type(1)'): string | undefined => {
-    const section = document.querySelector<HTMLElement>(selector)
-    if (!section) return undefined
-    const accent = getComputedStyle(section).getPropertyValue('--col-accent')?.trim()
-    return accent || undefined
-  }
-
   const handleNavClick = (href: string) => {
     const el = document.querySelector<HTMLElement>(href)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-
-    const accent = getSectionAccentColor(href)
-    if (accent) setThemeColor(accent)
-
-    setIsOpen(false) // закрываем мобильное меню
+    setIsOpen(false)
   }
 
-  const openModalWithAccent = (selector: string = 'main > section:nth-of-type(1)') => {
-    const accent = getSectionAccentColor(selector)
-    if (accent) setThemeColor(accent)
-    setIsModalOpen(true)
-  }
+  const openModal = () => setIsModalOpen(true)
 
   return (
     <>
-      <header className={`fixed top-0 w-full z-50 transition-all ${scrolled ? 'bg-white/90 backdrop-blur border-b' : 'bg-transparent'}`}>
+      <header
+        className={`fixed top-0 w-full z-50 transition-all ${
+          scrolled
+            ? 'bg-black/70 backdrop-blur-md border-b border-white/10'
+            : 'bg-transparent'
+        }`}
+      >
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <a href="#" className="text-2xl font-bold text-blue-600">Больше нуля</a>
-          
+          <a
+            href="#"
+            className="text-2xl font-bold text-white hover:text-blue-400 transition"
+          >
+            Больше нуля
+          </a>
+
           <nav className="hidden md:flex space-x-8">
             {navItems.map(item => (
               <button
-                key={item.href} 
+                key={item.href}
                 onClick={() => handleNavClick(item.href)}
-                className="hover:text-blue-600 transition-colors duration-300"
+                className="relative text-gray-200 hover:text-white transition-colors duration-300
+                           after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 
+                           after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500
+                           hover:after:w-full after:transition-all after:duration-300"
               >
                 {item.name}
               </button>
             ))}
           </nav>
 
+          {/* 🔹 Кнопка консультации с курсором и эффектами */}
           <button
-            onClick={() => openModalWithAccent()}
-            className="hidden md:block cta-button flex-shrink-0"
+            onClick={openModal}
+            className="hidden md:block px-6 py-2 font-semibold text-white rounded-full
+                       bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg cursor-pointer
+                       transition-all duration-300 transform
+                       hover:-translate-y-0.5 hover:scale-105
+                       hover:shadow-[0_0_18px_rgba(59,130,246,0.7)]
+                       active:scale-95"
           >
             Консультация
           </button>
 
-          <button 
-            className="md:hidden text-gray-800"
+          <button
+            className="md:hidden text-gray-200"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Мобильное меню с анимацией */}
+        {/* Мобильное меню */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -89,14 +93,14 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.25 }}
-              className="md:hidden bg-white border-t"
+              className="md:hidden bg-black/90 backdrop-blur-lg border-t border-white/10"
             >
-              <div className="container mx-auto px-6 py-4 flex flex-col space-y-4">
+              <div className="container mx-auto px-6 py-6 flex flex-col space-y-6">
                 {navItems.map(item => (
                   <button
                     key={item.href}
                     onClick={() => handleNavClick(item.href)}
-                    className="py-2 hover:text-blue-600 transition text-left"
+                    className="text-left text-gray-200 hover:text-white transition-colors duration-300"
                   >
                     {item.name}
                   </button>
@@ -104,9 +108,14 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     setIsOpen(false)
-                    openModalWithAccent()
+                    openModal()
                   }}
-                  className="cta-button mt-4 flex-shrink-0"
+                  className="px-6 py-3 font-semibold text-white rounded-full
+                             bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg cursor-pointer
+                             transition-all duration-300 transform
+                             hover:-translate-y-0.5 hover:scale-105
+                             hover:shadow-[0_0_18px_rgba(59,130,246,0.7)]
+                             active:scale-95"
                 >
                   Консультация
                 </button>

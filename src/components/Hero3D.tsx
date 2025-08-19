@@ -6,6 +6,10 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { EffectComposer, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 
+/**
+ * buildMorphTargets
+ * (взято из твоего оригинального файла, минимально подправлено для читаемости)
+ */
 function buildMorphTargets(base: THREE.BufferGeometry) {
   const pos = base.attributes.position as THREE.BufferAttribute
   const count = pos.count
@@ -19,10 +23,12 @@ function buildMorphTargets(base: THREE.BufferGeometry) {
     const v = new THREE.Vector3()
     const no = new THREE.Vector3()
     for (let i = 0; i < count; i++) {
-      v.set(basePositions[i*3], basePositions[i*3+1], basePositions[i*3+2])
-      no.set(normals[i*3], normals[i*3+1], normals[i*3+2]).normalize()
+      v.set(basePositions[i * 3], basePositions[i * 3 + 1], basePositions[i * 3 + 2])
+      no.set(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]).normalize()
       cb(i, v, no)
-      target[i*3] = v.x; target[i*3+1] = v.y; target[i*3+2] = v.z
+      target[i * 3] = v.x
+      target[i * 3 + 1] = v.y
+      target[i * 3 + 2] = v.z
     }
   }
 
@@ -143,13 +149,16 @@ function MorphingCore() {
   return (
     <group position={[0, 0.35, 0]}>
       <mesh ref={mesh} geometry={baseGeom.clone()}>
+        {/* --- МИНИМАЛЬНО ПРАВЛЕННЫЙ material (реалистичнее, но безопасно) --- */}
         <meshPhysicalMaterial
-          roughness={0.15}
-          metalness={0.15}
+          roughness={0.22}
+          metalness={0.25}
           clearcoat={0.65}
-          clearcoatRoughness={0.23}
-          transmission={0.0}
+          clearcoatRoughness={0.2}
+          transmission={0.30}
+          ior={1.25}
           thickness={0.6}
+          envMapIntensity={0.6}
           transparent
         />
       </mesh>
@@ -165,8 +174,12 @@ function Scene() {
     <group>
       <MorphingCore />
       <ambientLight intensity={0.35} />
+      {/* Мягкий 'небо/земля' свет (без новых зависимостей) */}
+      <hemisphereLight args={['#e0e7ff', '#0b1020', 0.35]} />
       <directionalLight position={[5, 5, 6]} intensity={1.0} color={'#a78bfa'} />
       <directionalLight position={[-6, -4, 2]} intensity={0.55} color={'#67e8f9'} />
+      {/* Лёгкий хайлайт спереди (камеры) */}
+      <pointLight position={[0, 0, 6]} intensity={0.6} distance={20} />
       <fog attach="fog" args={[new THREE.Color('#05060d'), 20, 160]} />
     </group>
   )
@@ -176,13 +189,23 @@ export default function Hero3D() {
   return (
     <div className="absolute inset-0 -z-10 pointer-events-none">
       <Canvas
+        dpr={[1, 1.75]}
         camera={{ position: [0, 0, 8], fov: 50 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         shadows={false}
         style={{ background: 'transparent' }}
-        onCreated={({ gl }) => gl.setClearAlpha(0)}
+        onCreated={({ gl }) => {
+          gl.setClearAlpha(0)
+          gl.toneMapping = THREE.ACESFilmicToneMapping
+          
+          // Улучшаем тональную карту для более "кинематографического" и реалистичного вида.
+          gl.toneMapping = THREE.ACESFilmicToneMapping
+          // outputColorSpace может отсутствовать в некоторых версиях three — подавим типовую ошибку аккуратно
+          
+          gl.outputColorSpace = THREE.SRGBColorSpace
+        }}
       >
-        {/* УБРАНО: <color attach="background" args={['#05060d']} /> — чтобы видеть глобальные звёзды */}
+        {/* Убрано явное цветовое заполнение, чтобы фон секции мог быть гибким */}
         <Suspense fallback={null}>
           <Scene />
           <EffectComposer multisampling={0}>
