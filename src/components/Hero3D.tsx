@@ -3,12 +3,12 @@
 import React, { Suspense, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { EffectComposer, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
+import { Environment, Lightformer } from '@react-three/drei'
 
 /**
  * buildMorphTargets
- * (взято из твоего оригинального файла, минимально подправлено для читаемости)
  */
 function buildMorphTargets(base: THREE.BufferGeometry) {
   const pos = base.attributes.position as THREE.BufferAttribute
@@ -74,11 +74,11 @@ function MorphingCore() {
 
   const palette = useMemo(
     () => [
-      new THREE.Color('#4cc9f0'),
+      new THREE.Color('#235d6eff'),
       new THREE.Color('#4361ee'),
-      new THREE.Color('#7209b7'),
-      new THREE.Color('#3a0ca3'),
-      new THREE.Color('#f1f1f1'),
+      new THREE.Color('#3e0166ff'),
+      new THREE.Color('#1d1433ff'),
+      new THREE.Color('#970505ff'),
     ],
     []
   )
@@ -138,32 +138,35 @@ function MorphingCore() {
 
     const solid = mesh.current.material as THREE.MeshPhysicalMaterial
     solid.color = current
-    solid.opacity = 0.65 + 0.15 * Math.sin(t * 1.2)
+    solid.opacity = 0.85
     solid.transparent = true
-    solid.emissive = current.clone().multiplyScalar(0.16 + 0.12 * Math.sin(t * 0.8 + 0.5) * 0.5)
+    solid.emissive = current.clone().multiplyScalar(0.08 + 0.05 * Math.sin(t * 0.8 + 0.5))
 
     const wf = wire.current.material as THREE.MeshBasicMaterial
-    wf.opacity = 0.16 + 0.2 * Math.abs(Math.sin(t * 0.9))
+    wf.opacity = 0.12 + 0.18 * Math.abs(Math.sin(t * 0.9))
   })
 
   return (
     <group position={[0, 0.35, 0]}>
       <mesh ref={mesh} geometry={baseGeom.clone()}>
-        {/* --- МИНИМАЛЬНО ПРАВЛЕННЫЙ material (реалистичнее, но безопасно) --- */}
+        {/* --- реалистичный материал --- */}
         <meshPhysicalMaterial
-          roughness={0.22}
-          metalness={0.25}
-          clearcoat={0.65}
-          clearcoatRoughness={0.2}
-          transmission={0.30}
-          ior={1.25}
-          thickness={0.6}
-          envMapIntensity={0.6}
+          roughness={0.05}
+          metalness={0.35}
+          clearcoat={1.0}
+          clearcoatRoughness={0.08}
+          transmission={0.92}
+          thickness={1.25}
+          ior={1.45}
+          reflectivity={0.9}
+          attenuationDistance={2.5}
+          attenuationColor={'#bcdfff'}
+          envMapIntensity={1.2}
           transparent
         />
       </mesh>
       <mesh ref={wire} geometry={baseGeom.clone()}>
-        <meshBasicMaterial color="#e5e7eb" wireframe transparent opacity={0.26} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial color="#e5e7eb" wireframe transparent opacity={0.22} blending={THREE.AdditiveBlending} />
       </mesh>
     </group>
   )
@@ -173,14 +176,18 @@ function Scene() {
   return (
     <group>
       <MorphingCore />
-      <ambientLight intensity={0.35} />
-      {/* Мягкий 'небо/земля' свет (без новых зависимостей) */}
-      <hemisphereLight args={['#e0e7ff', '#0b1020', 0.35]} />
-      <directionalLight position={[5, 5, 6]} intensity={1.0} color={'#a78bfa'} />
-      <directionalLight position={[-6, -4, 2]} intensity={0.55} color={'#67e8f9'} />
-      {/* Лёгкий хайлайт спереди (камеры) */}
-      <pointLight position={[0, 0, 6]} intensity={0.6} distance={20} />
-      <fog attach="fog" args={[new THREE.Color('#05060d'), 20, 160]} />
+
+      {/* окружение как в студии */}
+      <Environment resolution={512}>
+        <Lightformer intensity={2} rotation-y={Math.PI / 4} position={[5, 0, -5]} scale={[10, 10, 1]} />
+        <Lightformer intensity={2} rotation-y={-Math.PI / 4} position={[-5, 0, -5]} scale={[10, 10, 1]} />
+        <Lightformer intensity={1.5} position={[0, 5, 5]} scale={[10, 10, 1]} />
+      </Environment>
+
+      <ambientLight intensity={0.25} />
+      <hemisphereLight args={['#e0e7ff', '#0b1020', 0.25]} />
+      <directionalLight position={[4, 6, 8]} intensity={1.0} color={'#ffffff'} castShadow />
+      <fog attach="fog" args={[new THREE.Color('#05060d'), 25, 160]} />
     </group>
   )
 }
@@ -189,7 +196,7 @@ export default function Hero3D() {
   return (
     <div className="absolute inset-0 -z-10 pointer-events-none">
       <Canvas
-        dpr={[1, 1.75]}
+        dpr={[1, 2]}
         camera={{ position: [0, 0, 8], fov: 50 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         shadows={false}
@@ -197,22 +204,20 @@ export default function Hero3D() {
         onCreated={({ gl }) => {
           gl.setClearAlpha(0)
           gl.toneMapping = THREE.ACESFilmicToneMapping
-          
-          // Улучшаем тональную карту для более "кинематографического" и реалистичного вида.
-          gl.toneMapping = THREE.ACESFilmicToneMapping
-          // outputColorSpace может отсутствовать в некоторых версиях three — подавим типовую ошибку аккуратно
-          
           gl.outputColorSpace = THREE.SRGBColorSpace
         }}
       >
-        {/* Убрано явное цветовое заполнение, чтобы фон секции мог быть гибким */}
         <Suspense fallback={null}>
           <Scene />
-          <EffectComposer multisampling={0}>
-            <Bloom intensity={0.7} luminanceThreshold={0.1} luminanceSmoothing={0.22} blendFunction={BlendFunction.SCREEN} />
-            <ChromaticAberration offset={[0.0012, 0.001]} />
-            <Vignette eskil={false} offset={0.22} darkness={0.82} />
-            <Noise opacity={0.02} premultiply />
+          <EffectComposer multisampling={4}>
+            <Bloom
+              intensity={0.5}
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.35}
+              blendFunction={BlendFunction.SCREEN}
+            />
+            <Vignette eskil={false} offset={0.18} darkness={0.65} />
+            <Noise opacity={0.015} premultiply />
           </EffectComposer>
         </Suspense>
       </Canvas>
