@@ -73,7 +73,7 @@ export default function HeroSection() {
               onClick={() => setIsModalOpen(true)}
               className="cta-button border border-gray-500 bg-transparent text-white hover:filter hover:brightness-105"
             >
-              Заказать аудит — от 30 000₽
+              Заказать аудит
             </button>
           </motion.div>
         </motion.div>
