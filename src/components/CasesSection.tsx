@@ -115,7 +115,7 @@ export default function CasesSection() {
                   {caseItem.result ?? ''}
                 </p>
 
-                {/* Акцентная линия внизу карточки (не кнопка, SEO-дружелюбно) */}
+                {/* Акцентная линия внизу карточки */}
                 <div
                   className="
                     mt-auto h-[2px] w-full rounded-full
@@ -138,6 +138,7 @@ export default function CasesSection() {
                 bg-gradient-to-r from-blue-500 to-indigo-600
                 shadow-md transition-all duration-300
                 hover:-translate-y-1 hover:shadow-lg hover:brightness-110
+                cursor-pointer
               "
             >
               Показать ещё

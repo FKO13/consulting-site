@@ -59,7 +59,8 @@ export default function BlogSection() {
             className="inline-block px-8 py-4 font-semibold text-white rounded-full
                        bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md
                        hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]
-                       transition-all duration-300"
+                       transition-all duration-300
+                       cursor-pointer"
           >
             Все видео (27+)
           </button>

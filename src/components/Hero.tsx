@@ -54,7 +54,7 @@ export default function HeroSection() {
             variants={fadeUp}
             className="mt-4 max-w-2xl text-lg text-gray-300"
           >
-            Профессиональный платный аудит Wildberries — глубокий разбор карточек,
+            Профессиональный аудит и консалтинг для Wildberries — глубокий разбор карточек,
             логистики и рекламных стратегий. Результат или возврат денег.
           </motion.p>
 

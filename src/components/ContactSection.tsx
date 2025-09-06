@@ -10,7 +10,6 @@ export default function ContactSection() {
   const [error, setError] = useState<string | null>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
 
-  // === форматирование телефона (оставил как было)
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '')
     if (digits.length === 0) return ''
@@ -22,6 +21,7 @@ export default function ContactSection() {
     if (rest.length >= 8) result += '-' + rest.slice(8, 10)
     return result
   }
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhone(e.target.value)
     setFormData(prev => ({ ...prev, phone: formatted }))
@@ -32,6 +32,7 @@ export default function ContactSection() {
       }
     })
   }
+
   const handlePhoneFocus = () => {
     if (!formData.phone) {
       setFormData(prev => ({ ...prev, phone: '+7 ' }))
@@ -40,6 +41,7 @@ export default function ContactSection() {
       })
     }
   }
+
   const normalizePhone = (formatted: string) => {
     const digits = formatted.replace(/\D/g, '')
     if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) return '+7' + digits.slice(1)
@@ -47,7 +49,6 @@ export default function ContactSection() {
     return '+' + digits
   }
 
-  // === отправка формы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -95,11 +96,9 @@ export default function ContactSection() {
           
           {/* Контакты */}
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-8 text-white">
-            {[
-              { icon: MapPin, title: 'Адрес', value: 'г. Санкт-Петербург, ул. Миллионная, 6' },
+            {[{ icon: MapPin, title: 'Адрес', value: 'г. Санкт-Петербург, ул. Миллионная, 6' },
               { icon: Phone, title: 'Телефон', value: '+7 (969) 703-50-00' },
-              { icon: Mail, title: 'Email', value: 'info@bolshe-nulya.ru' },
-            ].map((item, i) => (
+              { icon: Mail, title: 'Email', value: 'info@bolshe-nulya.ru' }].map((item, i) => (
               <div key={i} className="flex items-start bg-gray-900/30 border border-gray-800 rounded-xl p-5 hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition">
                 <div className="p-3 rounded-full bg-gray-800 mr-4 flex items-center justify-center">
                   <item.icon className="text-blue-400" size={22} />
@@ -129,7 +128,7 @@ export default function ContactSection() {
 
                 {error && <div className="text-red-400 text-sm">{error}</div>}
 
-                <button type="submit" disabled={isLoading} className={`w-full px-8 py-4 rounded-full font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80 cursor-wait' : ''}`}>
+                <button type="submit" disabled={isLoading} className={`w-full px-8 py-4 rounded-full font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2 ${isLoading ? 'opacity-80 cursor-wait' : 'cursor-pointer'}`}>
                   {isLoading ? <> <Loader2 className="animate-spin" /> Отправка... </> : 'Отправить'}
                 </button>
               </>

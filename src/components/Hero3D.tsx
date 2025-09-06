@@ -1,15 +1,13 @@
-'use client'
+/* src/components/Hero3D.tsx */
+"use client"
 
-import React, { Suspense, useMemo, useRef } from 'react'
-import * as THREE from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { EffectComposer, Bloom, Vignette, Noise } from '@react-three/postprocessing'
-import { BlendFunction } from 'postprocessing'
-import { Environment, Lightformer } from '@react-three/drei'
+import React, { Suspense, useMemo, useRef, useState, useEffect } from "react"
+import * as THREE from "three"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { EffectComposer, Bloom, Vignette, Noise } from "@react-three/postprocessing"
+import { BlendFunction } from "postprocessing"
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment"
 
-/**
- * buildMorphTargets
- */
 function buildMorphTargets(base: THREE.BufferGeometry) {
   const pos = base.attributes.position as THREE.BufferAttribute
   const count = pos.count
@@ -33,7 +31,6 @@ function buildMorphTargets(base: THREE.BufferGeometry) {
   }
 
   const A = toArray()
-
   const B = new Float32Array(count * 3)
   forEachVertex((_, v, no) => {
     const k = Math.pow(Math.abs(no.x) + Math.abs(no.y) + Math.abs(no.z), 0.85)
@@ -68,26 +65,40 @@ function buildMorphTargets(base: THREE.BufferGeometry) {
   return { A, B, C, D, E, count }
 }
 
-function MorphingCore() {
-  const mesh = useRef<THREE.Mesh>(null)
-  const wire = useRef<THREE.Mesh>(null)
+function useDevice() {
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+  useEffect(() => {
+    const check = () => {
+      const w = typeof window !== "undefined" ? window.innerWidth : 1024
+      setIsMobile(w < 768)
+    }
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+  return { isMobile }
+}
+
+function MorphingCore({ detail }: { detail: number }) {
+  const mesh = useRef<THREE.Mesh>(null!)
+  const wire = useRef<THREE.Mesh>(null!)
 
   const palette = useMemo(
     () => [
-      new THREE.Color('#235d6eff'),
-      new THREE.Color('#4361ee'),
-      new THREE.Color('#3e0166ff'),
-      new THREE.Color('#1d1433ff'),
-      new THREE.Color('#970505ff'),
+      new THREE.Color("#235d6e"),
+      new THREE.Color("#4361ee"),
+      new THREE.Color("#3e0166"),
+      new THREE.Color("#1d1433"),
+      new THREE.Color("#970505"),
     ],
     []
   )
 
   const baseGeom = useMemo(() => {
-    const g = new THREE.IcosahedronGeometry(1.0, 3)
+    const g = new THREE.IcosahedronGeometry(1.0, detail)
     g.applyMatrix4(new THREE.Matrix4().makeScale(1.9, 1.9, 1.9))
     return g
-  }, [])
+  }, [detail])
 
   const morph = useMemo(() => buildMorphTargets(baseGeom.clone()), [baseGeom])
   const working = useMemo(() => new Float32Array(morph.count * 3), [morph.count])
@@ -137,34 +148,35 @@ function MorphingCore() {
     const current = cFrom.clone().lerp(cTo, ease(cw))
 
     const solid = mesh.current.material as THREE.MeshPhysicalMaterial
-    solid.color = current
-    solid.opacity = 0.85
-    solid.transparent = true
-    solid.emissive = current.clone().multiplyScalar(0.08 + 0.05 * Math.sin(t * 0.8 + 0.5))
+    solid.color.copy(current)
+    solid.metalness = 1.0
+    solid.roughness = 0.12
+    solid.clearcoat = 0.35
+    solid.clearcoatRoughness = 0.18
+    solid.envMapIntensity = 1.2
+    solid.transparent = false
+    solid.opacity = 1.0
+    solid.emissive.setRGB(0.01, 0.01, 0.01)
 
     const wf = wire.current.material as THREE.MeshBasicMaterial
-    wf.opacity = 0.12 + 0.18 * Math.abs(Math.sin(t * 0.9))
+    wf.opacity = 0.14 + 0.12 * Math.abs(Math.sin(t * 0.9))
   })
 
   return (
     <group position={[0, 0.35, 0]}>
       <mesh ref={mesh} geometry={baseGeom.clone()}>
-        {/* --- реалистичный материал --- */}
         <meshPhysicalMaterial
-          roughness={0.05}
-          metalness={0.35}
-          clearcoat={1.0}
-          clearcoatRoughness={0.08}
-          transmission={0.92}
-          thickness={1.25}
-          ior={1.45}
-          reflectivity={0.9}
-          attenuationDistance={2.5}
-          attenuationColor={'#bcdfff'}
+          roughness={0.12}
+          metalness={1.0}
+          clearcoat={0.35}
+          clearcoatRoughness={0.18}
           envMapIntensity={1.2}
-          transparent
+          transparent={false}
+          opacity={1}
+          side={THREE.DoubleSide}
         />
       </mesh>
+
       <mesh ref={wire} geometry={baseGeom.clone()}>
         <meshBasicMaterial color="#e5e7eb" wireframe transparent opacity={0.22} blending={THREE.AdditiveBlending} />
       </mesh>
@@ -172,53 +184,57 @@ function MorphingCore() {
   )
 }
 
-function Scene() {
+function Scene({ isMobile }: { isMobile: boolean }) {
+  const dirIntensity = isMobile ? 0.7 : 1.0
+  const dir2Intensity = isMobile ? 0.35 : 0.55
+
   return (
     <group>
-      <MorphingCore />
-
-      {/* окружение как в студии */}
-      <Environment resolution={512}>
-        <Lightformer intensity={2} rotation-y={Math.PI / 4} position={[5, 0, -5]} scale={[10, 10, 1]} />
-        <Lightformer intensity={2} rotation-y={-Math.PI / 4} position={[-5, 0, -5]} scale={[10, 10, 1]} />
-        <Lightformer intensity={1.5} position={[0, 5, 5]} scale={[10, 10, 1]} />
-      </Environment>
-
-      <ambientLight intensity={0.25} />
-      <hemisphereLight args={['#e0e7ff', '#0b1020', 0.25]} />
-      <directionalLight position={[4, 6, 8]} intensity={1.0} color={'#ffffff'} castShadow />
-      <fog attach="fog" args={[new THREE.Color('#05060d'), 25, 160]} />
+      <MorphingCore detail={isMobile ? 2 : 3} />
+      <ambientLight intensity={isMobile ? 0.22 : 0.35} />
+      <hemisphereLight args={["#e0e7ff", "#0b1020", isMobile ? 0.25 : 0.35]} />
+      <directionalLight position={[5, 5, 6]} intensity={dirIntensity} color={"#a78bfa"} />
+      <directionalLight position={[-6, -4, 2]} intensity={dir2Intensity} color={"#67e8f9"} />
+      <pointLight position={[0, 0, 6]} intensity={isMobile ? 0.45 : 0.6} distance={20} />
+      <fog attach="fog" args={[new THREE.Color("#05060d"), 20, 160]} />
     </group>
   )
 }
 
 export default function Hero3D() {
+  const { isMobile } = useDevice()
+
   return (
     <div className="absolute inset-0 -z-10 pointer-events-none">
       <Canvas
-        dpr={[1, 2]}
-        camera={{ position: [0, 0, 8], fov: 50 }}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
+        camera={{ position: [0, 0, isMobile ? 9.5 : 8], fov: isMobile ? 58 : 50 }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         shadows={false}
-        style={{ background: 'transparent' }}
-        onCreated={({ gl }) => {
+        style={{ background: "transparent" }}
+        onCreated={({ gl, scene }) => {
           gl.setClearAlpha(0)
           gl.toneMapping = THREE.ACESFilmicToneMapping
+          gl.toneMappingExposure = 1.0
           gl.outputColorSpace = THREE.SRGBColorSpace
+
+          const pmrem = new THREE.PMREMGenerator(gl)
+          pmrem.compileEquirectangularShader()
+          const roomEnv = new RoomEnvironment()
+          const envRenderTarget: THREE.WebGLRenderTarget = pmrem.fromScene(roomEnv, 0.04)
+          scene.environment = envRenderTarget.texture
         }}
       >
         <Suspense fallback={null}>
-          <Scene />
-          <EffectComposer multisampling={4}>
-            <Bloom
-              intensity={0.5}
-              luminanceThreshold={0.2}
-              luminanceSmoothing={0.35}
-              blendFunction={BlendFunction.SCREEN}
-            />
-            <Vignette eskil={false} offset={0.18} darkness={0.65} />
-            <Noise opacity={0.015} premultiply />
-          </EffectComposer>
+          <Scene isMobile={isMobile} />
+
+          {!isMobile && (
+            <EffectComposer multisampling={0}>
+              <Bloom intensity={0.5} luminanceThreshold={0.12} luminanceSmoothing={0.22} blendFunction={BlendFunction.SCREEN} />
+              <Vignette eskil={false} offset={0.18} darkness={0.65} />
+              <Noise opacity={0.01} premultiply />
+            </EffectComposer>
+          )}
         </Suspense>
       </Canvas>
     </div>

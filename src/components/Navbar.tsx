@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,7 +9,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [themeColor, setThemeColor] = useState<string>('var(--col-accent)')
+  const [themeColor] = useState<string>('var(--col-accent)') // setThemeColor удалён
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -42,12 +43,26 @@ export default function Navbar() {
         }`}
       >
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <a
+
+          <motion.a
             href="#"
-            className="text-2xl font-bold text-white hover:text-blue-400 transition"
+            className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600 bg-clip-text text-transparent cursor-pointer inline-block"
+            style={{ backgroundSize: '200% 200%' }}
+            animate={{ backgroundPosition: ['0% 50%', '100% 50%'] }}
+            transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
           >
-            Больше нуля
-          </a>
+            {Array.from('Больше Нуля').map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, type: 'spring', stiffness: 300 }}
+                className="inline-block"
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </motion.span>
+            ))}
+          </motion.a>
 
           <nav className="hidden md:flex space-x-8">
             {navItems.map(item => (
@@ -64,7 +79,6 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* 🔹 Кнопка консультации с курсором и эффектами */}
           <button
             onClick={openModal}
             className="hidden md:block px-6 py-2 font-semibold text-white rounded-full
@@ -78,14 +92,13 @@ export default function Navbar() {
           </button>
 
           <button
-            className="md:hidden text-gray-200"
+            className="md:hidden text-gray-200 z-50"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
 
-        {/* Мобильное меню */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -93,33 +106,31 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.25 }}
-              className="md:hidden bg-black/90 backdrop-blur-lg border-t border-white/10"
+              className="md:hidden fixed top-0 left-0 w-full h-screen bg-black/90 backdrop-blur-lg z-40 flex flex-col justify-center items-center space-y-8"
             >
-              <div className="container mx-auto px-6 py-6 flex flex-col space-y-6">
-                {navItems.map(item => (
-                  <button
-                    key={item.href}
-                    onClick={() => handleNavClick(item.href)}
-                    className="text-left text-gray-200 hover:text-white transition-colors duration-300"
-                  >
-                    {item.name}
-                  </button>
-                ))}
+              {navItems.map(item => (
                 <button
-                  onClick={() => {
-                    setIsOpen(false)
-                    openModal()
-                  }}
-                  className="px-6 py-3 font-semibold text-white rounded-full
-                             bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg cursor-pointer
-                             transition-all duration-300 transform
-                             hover:-translate-y-0.5 hover:scale-105
-                             hover:shadow-[0_0_18px_rgba(59,130,246,0.7)]
-                             active:scale-95"
+                  key={item.href}
+                  onClick={() => handleNavClick(item.href)}
+                  className="text-2xl text-gray-200 hover:text-white transition-colors duration-300"
                 >
-                  Консультация
+                  {item.name}
                 </button>
-              </div>
+              ))}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  openModal()
+                }}
+                className="px-8 py-3 font-semibold text-white rounded-full
+                           bg-gradient-to-r from-blue-500 to-indigo-600 shadow-lg cursor-pointer
+                           transition-all duration-300 transform
+                           hover:-translate-y-0.5 hover:scale-105
+                           hover:shadow-[0_0_18px_rgba(59,130,246,0.7)]
+                           active:scale-95"
+              >
+                Консультация
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
