@@ -167,38 +167,48 @@ export default function Hero3D() {
   const { isMobile } = useDevice()
 
   return (
-    <div className="absolute inset-0 -z-10 pointer-events-none">
-      <Canvas
-        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
-        camera={{ position: [0, 0, isMobile ? 9.5 : 8], fov: isMobile ? 58 : 50 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        shadows={false}
-        style={{ background: "transparent" }}
-        onCreated={({ gl, scene }) => {
-          gl.setClearAlpha(0)
-          gl.toneMapping = THREE.ACESFilmicToneMapping
-          gl.toneMappingExposure = 1.0
-          gl.outputColorSpace = THREE.SRGBColorSpace
+    <>
+      {/* Ключевой фикс от горизонтального скролла: не даём фону «выпирать» по оси X */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-x-clip">
+        <Canvas
+          dpr={isMobile ? [1, 1.25] : [1, 1.75]}
+          camera={{ position: [0, 0, isMobile ? 9.5 : 8], fov: isMobile ? 58 : 50 }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          shadows={false}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            background: "transparent",
+            display: "block",
+          }}
+          onCreated={({ gl, scene }) => {
+            gl.setClearAlpha(0)
+            gl.toneMapping = THREE.ACESFilmicToneMapping
+            gl.toneMappingExposure = 1.0
+            gl.outputColorSpace = THREE.SRGBColorSpace
 
-          const pmrem = new THREE.PMREMGenerator(gl)
-          pmrem.compileEquirectangularShader()
-          const roomEnv = new RoomEnvironment()
-          const envRenderTarget: THREE.WebGLRenderTarget = pmrem.fromScene(roomEnv, 0.04)
-          scene.environment = envRenderTarget.texture
-        }}
-      >
-        <Suspense fallback={null}>
-          <Scene isMobile={isMobile} />
+            const pmrem = new THREE.PMREMGenerator(gl)
+            pmrem.compileEquirectangularShader()
+            const roomEnv = new RoomEnvironment()
+            const envRenderTarget: THREE.WebGLRenderTarget = pmrem.fromScene(roomEnv, 0.04)
+            scene.environment = envRenderTarget.texture
+          }}
+        >
+          <Suspense fallback={null}>
+            <Scene isMobile={isMobile} />
 
-          {!isMobile && (
-            <EffectComposer multisampling={0}>
-              <Bloom intensity={0.5} luminanceThreshold={0.12} luminanceSmoothing={0.22} blendFunction={BlendFunction.SCREEN} />
-              <Vignette eskil={false} offset={0.18} darkness={0.65} />
-              <Noise opacity={0.01} premultiply />
-            </EffectComposer>
-          )}
-        </Suspense>
-      </Canvas>
-    </div>
+            {!isMobile && (
+              <EffectComposer multisampling={0}>
+                <Bloom intensity={0.5} luminanceThreshold={0.12} luminanceSmoothing={0.22} blendFunction={BlendFunction.SCREEN} />
+                <Vignette eskil={false} offset={0.18} darkness={0.65} />
+                <Noise opacity={0.01} premultiply />
+              </EffectComposer>
+            )}
+          </Suspense>
+        </Canvas>
+      </div>
+    </>
   )
 }

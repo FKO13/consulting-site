@@ -35,7 +35,22 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   font-weight: 400;
+
+  /* ✅ Добавлено: фикс горизонтального скролла и «разъезжания» вьюпорта */
+  max-width: 100%;
+  overflow-x: hidden;
 }
+
+/* ✅ Добавлено: медиа и канвасы не растягивают вьюпорт */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ✅ Добавлено: утилиты для безопасных зон iOS (если понадобятся) */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top    { padding-top: env(safe-area-inset-top); }
 
 /* Контейнер */
 .container {
@@ -107,7 +122,9 @@ html, body {
   position: relative;
   height: 100vh;
   min-height: 640px;
-  overflow: hidden;
+  overflow: hidden;      /* было: hidden — оставляю */
+  /* ✅ Добавлено: точечная отсечка X на всякий случай (постэффекты/канвас) */
+  overflow-x: clip;
   background: linear-gradient(180deg, #070616 0%, #1e0b3a 60%, #2d0a49 100%);
 }
 

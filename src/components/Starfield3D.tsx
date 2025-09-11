@@ -142,11 +142,14 @@ export default function Starfield3D() {
   const enablePost = !isMobile
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+    // overflow-x-clip — ключ к устранению горизонтального скролла из-за фонового Canvas
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-x-clip" aria-hidden>
       <Canvas
-        style={{ position: 'fixed', top: 0, left: 0 }}
+        // Явные размеры, чтобы Canvas не создавал ширину больше 100vw
+        style={{ position: 'fixed', inset: 0, width: '100%', height: '100%' }}
         camera={{ position: [0, 0, 8], fov: isMobile ? 55 : 50 }}
         gl={{ alpha: true, antialias, powerPreference: 'high-performance' }}
+        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
         shadows={false}
       >
         <Suspense fallback={null}>
