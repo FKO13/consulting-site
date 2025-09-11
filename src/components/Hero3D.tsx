@@ -30,39 +30,16 @@ function buildMorphTargets(base: THREE.BufferGeometry) {
     }
   }
 
+  // Базовая форма
   const A = toArray()
+
+  // Форма с сильным "разлетом" (толще осколки)
   const B = new Float32Array(count * 3)
   forEachVertex((_, v, no) => {
-    const k = Math.pow(Math.abs(no.x) + Math.abs(no.y) + Math.abs(no.z), 0.85)
-    v.copy(no).multiplyScalar(1.9 * k)
+    v.copy(no).multiplyScalar(3.5) // было 1.9, увеличил почти в 2 раза
   }, B)
 
-  const C = new Float32Array(count * 3)
-  forEachVertex((_, v, no) => {
-    const m = Math.max(Math.abs(no.x), Math.abs(no.y), Math.abs(no.z))
-    const k = Math.pow(m, 1.1)
-    v.copy(no).multiplyScalar(1.9 * k)
-  }, C)
-
-  const D = new Float32Array(count * 3)
-  forEachVertex((_, v, no) => {
-    const theta = Math.atan2(no.y, no.x)
-    const phi = Math.acos(THREE.MathUtils.clamp(no.z, -1, 1))
-    const r = 1.9 * (1.0 + 0.16 * Math.sin(5.0 * theta) * Math.cos(5.0 * phi))
-    v.copy(no).multiplyScalar(r)
-  }, D)
-
-  const E = new Float32Array(count * 3)
-  const n3 = (x: number, y: number, z: number) => {
-    const s = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719)
-    return (Math.sin(s) + 1) * 0.5
-  }
-  forEachVertex((i, v, no) => {
-    const k = 0.12 + 0.12 * n3(no.x + i * 0.0003, no.y - i * 0.0007, no.z + i * 0.00011)
-    v.copy(no).multiplyScalar(1.9 * (1.0 + k))
-  }, E)
-
-  return { A, B, C, D, E, count }
+  return { A, B, count }
 }
 
 function useDevice() {
@@ -107,20 +84,15 @@ function MorphingCore({ detail }: { detail: number }) {
     if (!mesh.current || !wire.current) return
     const t = state.clock.getElapsedTime()
 
-    const period = 5.0
-    const total = 5
-    const phase = (t / period) % total
-    const i = Math.floor(phase)
-    const local = phase - i
+    const period = 20.0
+    const local = (Math.sin((t / period) * Math.PI * 2) + 1) / 2 // туда-сюда [0,1]
 
-    const targets = [morph.A, morph.B, morph.C, morph.D, morph.E, morph.A]
-    const from = targets[i]
-    const to = targets[i + 1]
+    const from = morph.A
+    const to = morph.B
 
-    const ease = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * x)
-    const w = ease(local)
-
-    for (let k = 0; k < working.length; k++) working[k] = from[k] * (1 - w) + to[k] * w
+    for (let k = 0; k < working.length; k++) {
+      working[k] = from[k] * (1 - local) + to[k] * local
+    }
 
     const geo = mesh.current.geometry as THREE.BufferGeometry
     geo.attributes.position.array.set(working)
@@ -143,23 +115,13 @@ function MorphingCore({ detail }: { detail: number }) {
     const colorPhase = (t * 0.25) % palette.length
     const ci = Math.floor(colorPhase)
     const cw = colorPhase - ci
-    const cFrom = palette[ci]
-    const cTo = palette[(ci + 1) % palette.length]
-    const current = cFrom.clone().lerp(cTo, ease(cw))
+    const current = palette[ci].clone().lerp(palette[(ci + 1) % palette.length], cw)
 
     const solid = mesh.current.material as THREE.MeshPhysicalMaterial
     solid.color.copy(current)
-    solid.metalness = 1.0
-    solid.roughness = 0.12
-    solid.clearcoat = 0.35
-    solid.clearcoatRoughness = 0.18
-    solid.envMapIntensity = 1.2
-    solid.transparent = false
-    solid.opacity = 1.0
-    solid.emissive.setRGB(0.01, 0.01, 0.01)
 
     const wf = wire.current.material as THREE.MeshBasicMaterial
-    wf.opacity = 0.14 + 0.12 * Math.abs(Math.sin(t * 0.9))
+    wf.opacity = 0.2
   })
 
   return (
@@ -178,7 +140,7 @@ function MorphingCore({ detail }: { detail: number }) {
       </mesh>
 
       <mesh ref={wire} geometry={baseGeom.clone()}>
-        <meshBasicMaterial color="#e5e7eb" wireframe transparent opacity={0.22} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial color="#e5e7eb" wireframe transparent opacity={0.25} blending={THREE.AdditiveBlending} />
       </mesh>
     </group>
   )
