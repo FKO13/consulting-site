@@ -97,7 +97,7 @@ export default function ContactSection() {
           {/* Контакты */}
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-8 text-white">
             {[{ icon: MapPin, title: 'Адрес', value: 'г. Санкт-Петербург, ул. Миллионная, 6' },
-              { icon: Phone, title: 'Телефон', value: '+7 (969) 703-50-00' },
+              { icon: Phone, title: 'Телефон', value: '+7 (995) 090-96-69' },
               { icon: Mail, title: 'Email', value: 'info@bolshe-nulya.ru' }].map((item, i) => (
               <div key={i} className="flex items-start bg-gray-900/30 border border-gray-800 rounded-xl p-5 hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition">
                 <div className="p-3 rounded-full bg-gray-800 mr-4 flex items-center justify-center">
