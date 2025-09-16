@@ -5,6 +5,8 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Starfield3D from '@/components/Starfield3D'
+import Script from 'next/script'
+
 
 // ВАЖНО: пути относительные к этому файлу (src/app/layout.tsx)
 const inter = localFont({
@@ -49,7 +51,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
         </div>
-      </body>
+      
+        {/* Yandex.Metrika */}
+        <Script id="ym-loader" strategy="afterInteractive">
+          {`
+            (function(m,e,t,r,i,k,a){
+                m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+                m[i].l=1*new Date();
+                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+            })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=104173686', 'ym');
+
+            ym(104173686, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+          `}
+        </Script>
+        <noscript>
+          <div>
+            <img src="https://mc.yandex.ru/watch/104173686" style={{position:'absolute', left:'-9999px'}} alt="" />
+          </div>
+        </noscript>
+</body>
     </html>
   )
 }
